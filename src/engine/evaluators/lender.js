@@ -1,5 +1,7 @@
 /**
  * Evaluates an applicant against a single NBFC lender's criteria using 4-state logic.
+ * Engine v2.3.0
+ * 
  * States:
  * - ELIGIBLE: All required preliminary eligibility rules are satisfied.
  * - CONDITIONAL: Potentially eligible, but additional information or verification is required.
@@ -31,7 +33,7 @@ function evaluateLender(applicant, partnerConfig, policyMetadata = {}) {
   const discrepancies = getDiscrepancies(partnerId);
 
   // 1. CIBIL Evaluation
-  const cibilResult = evaluateCibil(applicant.cibil, c, partnerConfig.policy || {});
+  const cibilResult = evaluateCibil(applicant.cibil, c, partnerConfig.policy || {}, applicant);
   rulesEvaluated.push({
     rule_name: 'CIBIL_SCORE',
     status: cibilResult.status,
@@ -53,7 +55,7 @@ function evaluateLender(applicant, partnerConfig, policyMetadata = {}) {
   }
 
   // 2. Monthly Income Evaluation
-  const incomeResult = evaluateIncome(applicant.monthlyIncome, c);
+  const incomeResult = evaluateIncome(applicant.monthlyIncome, c, applicant);
   rulesEvaluated.push({
     rule_name: 'MONTHLY_INCOME',
     status: incomeResult.status,
@@ -75,7 +77,7 @@ function evaluateLender(applicant, partnerConfig, policyMetadata = {}) {
   }
 
   // 3. Age Evaluation
-  const ageResult = evaluateAge(applicant.age, c);
+  const ageResult = evaluateAge(applicant.age, c, applicant);
   rulesEvaluated.push({
     rule_name: 'COAPPLICANT_AGE',
     status: ageResult.status,
@@ -110,8 +112,7 @@ function evaluateLender(applicant, partnerConfig, policyMetadata = {}) {
       rule: 'COAPPLICANT_RELATIONSHIP',
       reason_code: relResult.reason_code,
       detail: relResult.detail,
-      canonical_relation: relResult.canonical,
-      original_relation: relResult.original
+      allowed_relations: relResult.allowed_relations
     });
   } else {
     missingRequirements.push(relResult.missing_requirement);
@@ -132,13 +133,13 @@ function evaluateLender(applicant, partnerConfig, policyMetadata = {}) {
       rule: 'COAPPLICANT_OCCUPATION',
       reason_code: occResult.reason_code,
       detail: occResult.detail,
-      occupation: occResult.occupation
+      restricted_occupation: occResult.restricted_occupation
     });
   } else {
     missingRequirements.push(occResult.missing_requirement);
   }
 
-  // 6. Bank Policy Evaluation
+  // 6. Bank Classification Evaluation
   const bankResult = evaluateBank(applicant.bank, c);
   rulesEvaluated.push({
     rule_name: 'BANK_ACCOUNT_TYPE',
@@ -192,7 +193,7 @@ function evaluateLender(applicant, partnerConfig, policyMetadata = {}) {
     missingRequirements.push(u.missing_requirement);
   });
 
-  // Decision Aggregation
+  // Decision Aggregation (Strict 4-State Logic)
   let classification = 'ELIGIBLE';
   let primaryReasonCode = 'CRITERIA_SATISFIED';
   let primaryReasonDetail = 'All mandatory underwriting criteria satisfied.';
@@ -202,7 +203,7 @@ function evaluateLender(applicant, partnerConfig, policyMetadata = {}) {
     classification = 'INELIGIBLE';
     primaryReasonCode = failures[0].reason_code;
     primaryReasonDetail = failures[0].detail;
-    recommendedNextAction = `Applicant disqualified for ${partnerName}: ${failures[0].detail}. Route to alternative partner.`;
+    recommendedNextAction = `Applicant disqualified for ${partnerName}: ${failures[0].detail}. Route to alternative eligible partner.`;
   } else if (missingRequirements.length > 0) {
     classification = 'CONDITIONAL';
     primaryReasonCode = 'ADDITIONAL_DOCUMENTS_REQUIRED';
@@ -210,35 +211,63 @@ function evaluateLender(applicant, partnerConfig, policyMetadata = {}) {
     recommendedNextAction = `Collect pending documents: ${missingRequirements.slice(0, 2).join('; ')} to finalize eligibility.`;
   }
 
+  // Reason codes collection
+  const reasonCodes = [];
+  if (primaryReasonCode) reasonCodes.push(primaryReasonCode);
+  failures.forEach(f => {
+    if (f.reason_code && !reasonCodes.includes(f.reason_code)) {
+      reasonCodes.push(f.reason_code);
+    }
+  });
+
+  // Verified inputs snapshot conforming to Section 5
+  const verifiedInputs = {
+    cibil_score: applicant.cibil ? applicant.cibil.exact_score : null,
+    cibil_range: applicant.cibil ? applicant.cibil.range_string : null,
+    monthly_income: applicant.monthlyIncome,
+    is_unusually_high_income: applicant.isUnusuallyHighIncome || false,
+    coapplicant_age: applicant.age,
+    is_minor: applicant.isMinor || false,
+    is_senior: applicant.isSenior || false,
+    relationship: applicant.relation ? applicant.relation.canonical : null,
+    occupation: applicant.occupation ? applicant.occupation.raw : null,
+    bank_name: applicant.bank ? applicant.bank.name : null,
+    bank_category: applicant.bank ? applicant.bank.category : null,
+    state: applicant.location ? applicant.location.state : null
+  };
+
+  const policyVersion = policyMetadata.policy_version || '2.3.0';
+  const algorithmVersion = '2.3.0';
+
   return {
+    // Section 5 Required Architecture Schema
+    nbfc: partnerName,
+    decision: classification,
+    reason_codes: reasonCodes,
+    hard_blockers: failures.map(f => f.detail || f.reason_code),
+    missing_requirements: missingRequirements,
+    verified_inputs: verifiedInputs,
+    policy_version: policyVersion,
+    algorithm_version: algorithmVersion,
+    recommended_next_action: recommendedNextAction,
+
+    // Legacy and backwards-compatibility fields
     nbfc_code: (partnerConfig.code || partnerId).toUpperCase(),
     partner_id: partnerId,
     partner_name: partnerName,
     priority: priority,
     classification: classification,
     decision_status: classification,
+    eligibility_status: classification,
     reason_code: primaryReasonCode,
     reason_detail: primaryReasonDetail,
     explanation: primaryReasonDetail,
     rules_evaluated: rulesEvaluated,
-    input_values: {
-      cibil: applicant.cibil,
-      monthly_income: applicant.monthlyIncome,
-      age: applicant.age,
-      relationship: applicant.relation ? applicant.relation.canonical : null,
-      occupation: applicant.occupation ? applicant.occupation.raw : null,
-      bank_name: applicant.bank ? applicant.bank.name : null,
-      state: applicant.location ? applicant.location.state : null
-    },
-    missing_requirements: missingRequirements,
-    hard_blockers: failures.map(f => f.detail || f.reason_code),
+    input_values: verifiedInputs,
     pending_verifications: pendingVerifications,
     matched_criteria: matchedCriteria,
     failures: failures,
-    policy_version: policyMetadata.policy_version || '2.1.0',
     effective_date: policyMetadata.effective_date || '2026-11-02',
-    algorithm_version: '2.1.0',
-    recommended_next_action: recommendedNextAction,
     discrepancies: discrepancies.length > 0 ? discrepancies : undefined
   };
 }

@@ -1,33 +1,71 @@
 /**
  * Applicant Data Normalizer & Attribute Extractor
- * Supports multiple enterprise payload schemas:
- * 1. "New Academy Co - Applicant NBFC Report" Schema:
- *    - userId
- *    - Academy PRE -Loan Journey Name
- *    - Choose NBFC / NBFC Onboarding Name
- *    - CIBIL Score Range
- *    - Relation with the Co-Applicant
- *    - Co applicant Occupation / Co-Applicant Occupation Other
- *    - Co-Applicant Age
- *    - State
- *    - Co-Applicant Monthly Income / Co-Applicant Monthly Income Value
- *    - Current Team
- * 2. Flat Salesforce SOQL Schema:
- *    - Academy_Onboarding_PRE__r.userId__c
- *    - Id
- *    - Name
- *    - CIBIL_SCORE_RANGE_PRE__c
- *    - RELATION_WITH_THE_COAPPLICANT_PRE__c
- *    - COAPPLICANT_MONTHLY_INCOME_PRE__c / COAPP_MONTHLY_INCOME_PRE__c
- *    - Co_Applicant_Occupation_PRE__c
- *    - Co_Applicant_state_pre__c
- *    - Co_Applicant_age_pre__c
- *    - Co_Applicant_s_Bank_Name_PRE__c
- * 3. Nested Microservice Schema (co_applicant_details, cibil_details, etc.)
+ * Engine v2.3.0 Production Architecture
+ * 
+ * Provides strict input parsing:
+ * - Currency strings (₹25,000, 25,000, etc.)
+ * - Boolean string conversions ("false" -> false, "true" -> true)
+ * - Anomaly detection for unusually high monthly incomes (> ₹2,00,000)
+ * - Co-applicant age bound detection (minor < 18, senior > 65)
+ * - Multi-attempt tracking (UID vs Application / Loan Journey attempt)
  */
 
 const { normalizeRelationship } = require('../config/relationship_map');
 const { classifyBank } = require('../config/bank_registry');
+
+/**
+ * Strict currency and number parsing
+ * Handles "₹25,000", "25,000", "₹ 1,40,000/-", numbers, etc.
+ */
+function parseCurrency(val) {
+  if (val === null || val === undefined || val === '') return null;
+  if (typeof val === 'number') {
+    return isFinite(val) ? val : null;
+  }
+  if (typeof val === 'string') {
+    const cleaned = val
+      .replace(/[₹RsINR\/\-\s]/gi, '')
+      .replace(/,/g, '')
+      .trim();
+    if (!cleaned) return null;
+    const parsed = parseFloat(cleaned);
+    return !isNaN(parsed) && isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
+/**
+ * Strict boolean parser
+ * Prevents "false" string from evaluating to true
+ */
+function parseStrictBoolean(val) {
+  if (val === undefined || val === null || val === '') return undefined;
+  if (typeof val === 'boolean') return val;
+  if (typeof val === 'number') return val === 1;
+  if (typeof val === 'string') {
+    const s = val.trim().toLowerCase();
+    if (s === 'true' || s === 'yes' || s === '1' || s === 'y') return true;
+    if (s === 'false' || s === 'no' || s === '0' || s === 'n') return false;
+  }
+  return undefined;
+}
+
+/**
+ * Strict integer age parser
+ */
+function parseStrictAge(val) {
+  if (val === null || val === undefined || val === '') return null;
+  if (typeof val === 'number') {
+    return Number.isInteger(val) ? val : Math.floor(val);
+  }
+  if (typeof val === 'string') {
+    const cleaned = val.replace(/[^\d]/g, '').trim();
+    if (!cleaned) return null;
+    const parsed = parseInt(cleaned, 10);
+    return !isNaN(parsed) ? parsed : null;
+  }
+  return null;
+}
 
 function normalizeApplicant(payload = {}, parameterQuestions = null) {
   const coApp = payload.co_applicant_details || {};
@@ -37,7 +75,7 @@ function normalizeApplicant(payload = {}, parameterQuestions = null) {
   const addr = payload.address_details || {};
   const user = payload.user_details || {};
 
-  // 1. Identifiers (Salesforce Id & User Id)
+  // 1. Identifiers & Application History Tracking
   const salesforceId =
     payload.Id ||
     payload.salesforce_id ||
@@ -55,6 +93,19 @@ function normalizeApplicant(payload = {}, parameterQuestions = null) {
     payload.user_id ||
     'unspecified-user';
 
+  const applicationId =
+    payload.application_id ||
+    payload['Application Id'] ||
+    payload['Academy PRE -Loan Journey Name'] ||
+    payload.Name ||
+    null;
+
+  const attemptId =
+    payload.attempt_id ||
+    payload['Attempt ID'] ||
+    payload.submission_attempt ||
+    null;
+
   // 2. Applicant Name
   const name =
     payload['Academy PRE -Loan Journey Name'] ||
@@ -63,7 +114,7 @@ function normalizeApplicant(payload = {}, parameterQuestions = null) {
     payload.name ||
     'Applicant';
 
-  // 3. CIBIL score extraction (Supports "CIBIL Score Range" & "CIBIL_SCORE_RANGE_PRE__c")
+  // 3. CIBIL score extraction
   let exactScore = null;
   let rangeString = null;
 
@@ -86,7 +137,7 @@ function normalizeApplicant(payload = {}, parameterQuestions = null) {
     if (!isNaN(parsed) && parsed > 0) exactScore = parsed;
   }
 
-  // 4. Monthly Income
+  // 4. Monthly Income with strict currency parsing
   let monthlyIncome = null;
   const rawIncome =
     payload['Co-Applicant Monthly Income'] !== undefined && payload['Co-Applicant Monthly Income'] !== null && payload['Co-Applicant Monthly Income'] !== ''
@@ -101,15 +152,13 @@ function normalizeApplicant(payload = {}, parameterQuestions = null) {
                       ? emp.monthly_income
                       : null))));
 
-  if (rawIncome !== null && rawIncome !== '') {
-    const parsed = parseFloat(rawIncome);
-    if (!isNaN(parsed)) {
-      monthlyIncome = parsed;
-    }
-  }
+  monthlyIncome = parseCurrency(rawIncome);
 
-  // 5. Co-Applicant Age
-  let age = null;
+  // Anomaly check: Unusually high income (> ₹2,00,000 / month)
+  // Flag as potential annual figure entered as monthly or executive income requiring ITR verification
+  const isUnusuallyHighIncome = typeof monthlyIncome === 'number' && monthlyIncome >= 200000;
+
+  // 5. Co-Applicant Age with strict parsing & bound anomaly check
   const rawAge =
     payload['Co-Applicant Age'] !== undefined && payload['Co-Applicant Age'] !== null && payload['Co-Applicant Age'] !== ''
       ? payload['Co-Applicant Age']
@@ -119,12 +168,9 @@ function normalizeApplicant(payload = {}, parameterQuestions = null) {
               ? coApp.age
               : null));
 
-  if (rawAge !== null && rawAge !== '') {
-    const parsed = parseInt(rawAge, 10);
-    if (!isNaN(parsed)) {
-      age = parsed;
-    }
-  }
+  const age = parseStrictAge(rawAge);
+  const isMinor = typeof age === 'number' && age < 18;
+  const isSenior = typeof age === 'number' && age > 65;
 
   // 6. Relationship
   const rawRelation =
@@ -149,7 +195,7 @@ function normalizeApplicant(payload = {}, parameterQuestions = null) {
     is_unspecified: !rawOcc || rawOcc.trim() === ''
   };
 
-  // 8. Bank (In this sheet, bank is unspecified or defaults to generic unless provided)
+  // 8. Bank (Normalized via bank registry)
   const rawBank =
     payload["Co-Applicant's Bank Name"] ||
     payload['Co-Applicant Bank Name'] ||
@@ -181,41 +227,45 @@ function normalizeApplicant(payload = {}, parameterQuestions = null) {
     source: payload.State ? 'REPORT_STATE' : (payload.Co_Applicant_state_pre__c ? 'SALESFORCE_COAPP_FIELD' : (coApp.state ? 'CO_APPLICANT' : 'ADDRESS_DETAILS'))
   };
 
-  // 10. Parameter Questions
+  // 10. Parameter Questions with strict boolean parsing
   const hasExplicitQuestions = Boolean(parameterQuestions || payload.parameter_questions);
   const qSource = parameterQuestions || payload.parameter_questions || {};
   const questions = {
     is_skipped: !hasExplicitQuestions,
-    is_pan_aadhaar_linked: qSource.is_pan_aadhaar_linked !== undefined
-      ? Boolean(qSource.is_pan_aadhaar_linked)
-      : undefined,
-    has_e_pan_or_physical_pan: qSource.has_e_pan_or_physical_pan !== undefined
-      ? Boolean(qSource.has_e_pan_or_physical_pan)
-      : undefined,
-    has_dob_mismatch: qSource.has_dob_mismatch !== undefined
-      ? Boolean(qSource.has_dob_mismatch)
-      : undefined,
-    has_name_mismatch: qSource.has_name_mismatch !== undefined
-      ? Boolean(qSource.has_name_mismatch)
-      : undefined,
-    has_door_number: qSource.has_door_number !== undefined
-      ? Boolean(qSource.has_door_number)
+    is_pan_aadhaar_linked: parseStrictBoolean(qSource.is_pan_aadhaar_linked),
+    has_e_pan_or_physical_pan: parseStrictBoolean(qSource.has_e_pan_or_physical_pan),
+    has_dob_mismatch: parseStrictBoolean(qSource.has_dob_mismatch),
+    has_name_mismatch: parseStrictBoolean(qSource.has_name_mismatch),
+    has_door_number: parseStrictBoolean(qSource.has_door_number) !== undefined
+      ? parseStrictBoolean(qSource.has_door_number)
       : (addr.door_number || coApp.door_number ? true : undefined)
   };
 
-  // 11. Historical Ground Truth Chosen NBFC (for accuracy audit)
+  // 11. Documented exception flags (e.g. credit committee override)
+  const hasDocumentedException = Boolean(
+    payload.has_documented_exception ||
+    payload.credit_committee_override ||
+    payload.is_underwriting_override
+  );
+
+  // 12. Historical Ground Truth Chosen NBFC
   const chosenNbfc = payload['Choose NBFC'] || payload['NBFC Onboarding Name'] || null;
 
   return {
     userApplicantId,
     salesforceId,
+    applicationId,
+    attemptId,
     name,
     cibil: {
       exact_score: exactScore,
       range_string: rangeString
     },
     monthlyIncome,
+    isUnusuallyHighIncome,
     age,
+    isMinor,
+    isSenior,
     relation: normalizedRelation,
     occupation: normalizedOccupation,
     bank: classifiedBank,
@@ -223,10 +273,14 @@ function normalizeApplicant(payload = {}, parameterQuestions = null) {
     questions,
     tenure: payload.selected_emi_tenure || 36,
     requestedLoanAmount: payload.requested_loan_amount || null,
+    hasDocumentedException,
     chosenNbfc
   };
 }
 
 module.exports = {
-  normalizeApplicant
+  normalizeApplicant,
+  parseCurrency,
+  parseStrictBoolean,
+  parseStrictAge
 };

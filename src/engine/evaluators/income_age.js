@@ -1,10 +1,14 @@
 /**
  * 3-Valued Income and Age Boundary Evaluator
- * Supports configurable prime thresholds, base underwriting floors, and senior age exception bands.
- * Enforces explicit UNKNOWN states on missing attributes and conditional review bands.
+ * Engine v2.3.0
+ * 
+ * Supports:
+ * - Configurable prime thresholds, base underwriting floors
+ * - High declared income anomaly detection (> ₹2,00,000 / month) requiring ITR/salary slip verification
+ * - Senior age exception bands and minor (< 18) disqualification
  */
 
-function evaluateIncome(monthlyIncome, lenderCriteria) {
+function evaluateIncome(monthlyIncome, lenderCriteria, applicantContext = {}) {
   const primeMin = lenderCriteria.monthly_income_min !== undefined
     ? lenderCriteria.monthly_income_min
     : 15000;
@@ -23,6 +27,7 @@ function evaluateIncome(monthlyIncome, lenderCriteria) {
 
   const income = parseFloat(monthlyIncome);
 
+  // Hard floor failure: Below minimum required underwriting floor
   if (income < hardMin) {
     return {
       status: 'FAIL',
@@ -33,6 +38,20 @@ function evaluateIncome(monthlyIncome, lenderCriteria) {
     };
   }
 
+  // Anomaly check: Unusually high income (>= ₹2,00,000 / month)
+  // Flags cases where annual income was entered as monthly or executive income needs proof
+  if (income >= 200000 && !applicantContext.hasDocumentedException) {
+    return {
+      status: 'UNKNOWN',
+      reason_code: 'HIGH_INCOME_VERIFICATION_REQUIRED',
+      detail: `Declared monthly income ₹${income.toLocaleString('en-IN')} is unusually high (>= ₹2,00,000); requires verified 3-month salary slips / Form 16 / ITR to confirm monthly vs annual income.`,
+      missing_requirement: `Verified 3-month salary slips / Form 16 / ITR for income ₹${income.toLocaleString('en-IN')}`,
+      actual: income,
+      is_high_income_flag: true
+    };
+  }
+
+  // Soft review floor: Above hard floor, but below prime criteria (requires bank statement AMB check)
   if (income < primeMin) {
     return {
       status: 'UNKNOWN',
@@ -52,7 +71,7 @@ function evaluateIncome(monthlyIncome, lenderCriteria) {
   };
 }
 
-function evaluateAge(rawAge, lenderCriteria) {
+function evaluateAge(rawAge, lenderCriteria, applicantContext = {}) {
   const maxSalaried = lenderCriteria.age_max || 58;
   const maxSeniorException = lenderCriteria.age_max_with_exception || maxSalaried;
   const minAllowed = lenderCriteria.age_min || 21;
@@ -76,6 +95,18 @@ function evaluateAge(rawAge, lenderCriteria) {
     };
   }
 
+  // Legal Minor check: Under 18 cannot be legal co-applicant
+  if (age < 18) {
+    return {
+      status: 'FAIL',
+      reason_code: 'MINOR_COAPPLICANT_PROHIBITED',
+      detail: `Co-applicant age ${age} is below legal majority (18 years). Minors cannot act as financial co-applicants.`,
+      required: 18,
+      actual: age
+    };
+  }
+
+  // Underage for lender-specific criteria
   if (age < minAllowed) {
     return {
       status: 'FAIL',
@@ -86,6 +117,7 @@ function evaluateAge(rawAge, lenderCriteria) {
     };
   }
 
+  // Exceeds absolute senior maximum limit
   if (age > maxSeniorException) {
     return {
       status: 'FAIL',
@@ -96,6 +128,7 @@ function evaluateAge(rawAge, lenderCriteria) {
     };
   }
 
+  // In senior exception band: age between maxSalaried and maxSeniorException
   if (age > maxSalaried) {
     return {
       status: 'UNKNOWN',

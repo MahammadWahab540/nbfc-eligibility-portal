@@ -1,7 +1,7 @@
 {
-  "version": "2.2.0",
+  "version": "2.3.0",
   "effective_date": "2026-11-02",
-  "last_updated": "2026-11-02T16:15:00.000Z",
+  "last_updated": "2026-11-02T17:25:00.000Z",
   "partners": [
     {
       "id": "northern_arc",
@@ -44,7 +44,10 @@
         "private_bank_accepted": true,
         "cooperative_bank_accepted": false,
         "door_number_mandatory": false
-      }
+      },
+      "policy_owner": "Credit Underwriting Committee",
+      "approval_reference": "NBFC-UW-V2.3-20261102",
+      "effective_date": "2026-11-02"
     },
     {
       "id": "bajaj",
@@ -88,7 +91,10 @@
         "cooperative_bank_accepted": false,
         "rrb_accepted": true,
         "door_number_mandatory": false
-      }
+      },
+      "policy_owner": "Credit Underwriting Committee",
+      "approval_reference": "NBFC-UW-V2.3-20261102",
+      "effective_date": "2026-11-02"
     },
     {
       "id": "auxilo",
@@ -118,18 +124,41 @@
         ],
         "rejected_occupations": [],
         "rejected_regions": [
-          { "state": "Jammu & Kashmir" },
-          { "state": "Lakshadweep" },
-          { "state": "Andaman & Nicobar" },
-          { "state": "Meghalaya" },
-          { "state": "Nagaland" },
-          { "state": "Manipur" },
-          { "state": "Tripura" },
-          { "state": "Mizoram" },
-          { "state": "Arunachal Pradesh" },
+          {
+            "state": "Jammu & Kashmir"
+          },
+          {
+            "state": "Lakshadweep"
+          },
+          {
+            "state": "Andaman & Nicobar"
+          },
+          {
+            "state": "Meghalaya"
+          },
+          {
+            "state": "Nagaland"
+          },
+          {
+            "state": "Manipur"
+          },
+          {
+            "state": "Tripura"
+          },
+          {
+            "state": "Mizoram"
+          },
+          {
+            "state": "Arunachal Pradesh"
+          },
           {
             "state": "Chhattisgarh",
-            "exceptions": ["Bhilai", "Raipur", "Durg", "Bilaspur"]
+            "exceptions": [
+              "Bhilai",
+              "Raipur",
+              "Durg",
+              "Bilaspur"
+            ]
           }
         ],
         "pan_aadhaar_linked_mandatory": true,
@@ -141,7 +170,10 @@
         "cooperative_bank_accepted": false,
         "rrb_accepted": false,
         "door_number_mandatory": false
-      }
+      },
+      "policy_owner": "Credit Underwriting Committee",
+      "approval_reference": "NBFC-UW-V2.3-20261102",
+      "effective_date": "2026-11-02"
     },
     {
       "id": "fibe",
@@ -189,7 +221,10 @@
         "cooperative_bank_accepted": false,
         "rrb_accepted": true,
         "door_number_mandatory": false
-      }
+      },
+      "policy_owner": "Credit Underwriting Committee",
+      "approval_reference": "NBFC-UW-V2.3-20261102",
+      "effective_date": "2026-11-02"
     },
     {
       "id": "gyandhan",
@@ -227,23 +262,47 @@
           "ANTI_SOCIAL_ELEMENTS"
         ],
         "rejected_regions": [
-          { "state": "Jammu & Kashmir" },
-          { "state": "Ladakh" },
-          { "state": "Tripura" },
-          { "state": "Meghalaya" },
-          { "state": "Mizoram" },
-          { "state": "Nagaland" },
-          { "state": "Arunachal Pradesh" },
-          { "state": "Andaman & Nicobar" },
-          { "state": "Lakshadweep" },
-          { "state": "Manipur" },
+          {
+            "state": "Jammu & Kashmir"
+          },
+          {
+            "state": "Ladakh"
+          },
+          {
+            "state": "Tripura"
+          },
+          {
+            "state": "Meghalaya"
+          },
+          {
+            "state": "Mizoram"
+          },
+          {
+            "state": "Nagaland"
+          },
+          {
+            "state": "Arunachal Pradesh"
+          },
+          {
+            "state": "Andaman & Nicobar"
+          },
+          {
+            "state": "Lakshadweep"
+          },
+          {
+            "state": "Manipur"
+          },
           {
             "state": "Assam",
-            "exceptions": ["Guwahati"]
+            "exceptions": [
+              "Guwahati"
+            ]
           },
           {
             "state": "Sikkim",
-            "exceptions": ["Gangtok"]
+            "exceptions": [
+              "Gangtok"
+            ]
           }
         ],
         "pan_aadhaar_linked_mandatory": true,
@@ -254,7 +313,10 @@
         "private_bank_accepted": true,
         "cooperative_bank_accepted": false,
         "door_number_mandatory": false
-      }
+      },
+      "policy_owner": "Credit Underwriting Committee",
+      "approval_reference": "NBFC-UW-V2.3-20261102",
+      "effective_date": "2026-11-02"
     },
     {
       "id": "techfino",
@@ -282,14 +344,30 @@
         ],
         "rejected_occupations": [],
         "rejected_regions": [
-          { "state": "Jammu & Kashmir" },
-          { "state": "Meghalaya" },
-          { "state": "Nagaland" },
-          { "state": "Andaman & Nicobar" },
-          { "state": "Lakshadweep" },
-          { "state": "Assam" },
-          { "state": "Sikkim" },
-          { "state": "Tripura" }
+          {
+            "state": "Jammu & Kashmir"
+          },
+          {
+            "state": "Meghalaya"
+          },
+          {
+            "state": "Nagaland"
+          },
+          {
+            "state": "Andaman & Nicobar"
+          },
+          {
+            "state": "Lakshadweep"
+          },
+          {
+            "state": "Assam"
+          },
+          {
+            "state": "Sikkim"
+          },
+          {
+            "state": "Tripura"
+          }
         ],
         "pan_aadhaar_linked_mandatory": true,
         "pan_card_mandatory": true,
@@ -299,7 +377,10 @@
         "private_bank_accepted": true,
         "cooperative_bank_accepted": false,
         "door_number_mandatory": true
-      }
+      },
+      "policy_owner": "Credit Underwriting Committee",
+      "approval_reference": "NBFC-UW-V2.3-20261102",
+      "effective_date": "2026-11-02"
     }
   ],
   "evaluated_external_partners": [
@@ -312,7 +393,12 @@
         "cibil_min": 650,
         "allows_ntc": true,
         "monthly_income_min": 15000,
-        "allowed_relations": ["Mother", "Father", "Sibling", "Any relative"],
+        "allowed_relations": [
+          "Mother",
+          "Father",
+          "Sibling",
+          "Any relative"
+        ],
         "accepts_unlinked_pan_aadhaar": true,
         "accepts_new_bank_accounts": true
       }
@@ -327,6 +413,28 @@
         "monthly_income_min": 15000,
         "speciality": "Flexible underwriting for complex banking / Grameen accounts"
       }
+    },
+    {
+      "id": "pinelabs",
+      "name": "PineLabs",
+      "status": "ASSESSED_PENDING_API_INTEGRATION",
+      "historical_disbursement_count": 3,
+      "inferred_criteria": {
+        "cibil_min": 650,
+        "monthly_income_min": 15000
+      }
+    },
+    {
+      "id": "shopse",
+      "name": "ShopSe",
+      "status": "ASSESSED_PENDING_API_INTEGRATION",
+      "historical_disbursement_count": 2,
+      "inferred_criteria": {
+        "cibil_min": 650,
+        "monthly_income_min": 15000
+      }
     }
-  ]
+  ],
+  "policy_owner": "Risk & Underwriting Committee",
+  "approval_reference": "NBFC-UW-V2.3-20261102"
 }

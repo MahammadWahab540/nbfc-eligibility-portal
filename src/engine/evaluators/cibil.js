@@ -1,13 +1,20 @@
 /**
  * 3-Valued CIBIL Score and Range Evaluator
+ * Engine v2.3.0
+ * 
  * Evaluates applicant against lender's CIBIL threshold using strict interval logic:
- * - PASS: Entire range meets or exceeds lender threshold.
+ * - PASS: Entire range meets or exceeds lender threshold, or documented override approved.
  * - FAIL: Entire range is below lender threshold.
  * - UNKNOWN: Range straddles the threshold, or score is missing/NTC (request exact bureau report).
  */
 
-function evaluateCibil(cibilObj, lenderCriteria, lenderPolicy = {}) {
+function evaluateCibil(cibilObj, lenderCriteria, lenderPolicy = {}, applicantContext = {}) {
   const threshold = lenderCriteria.cibil_min || 650;
+  const hasOverride = Boolean(
+    applicantContext.hasDocumentedException ||
+    applicantContext.credit_committee_override ||
+    lenderPolicy.override_approved
+  );
 
   // 1. Exact numeric CIBIL score provided
   if (cibilObj && typeof cibilObj.exact_score === 'number' && !isNaN(cibilObj.exact_score)) {
@@ -29,6 +36,14 @@ function evaluateCibil(cibilObj, lenderCriteria, lenderPolicy = {}) {
         score: score
       };
     } else {
+      if (hasOverride) {
+        return {
+          status: 'PASS',
+          matched: `Documented Credit Committee override approved for CIBIL score (${score} < ${threshold})`,
+          score: score,
+          is_override: true
+        };
+      }
       return {
         status: 'FAIL',
         reason_code: 'CIBIL_BELOW_MINIMUM',
@@ -69,12 +84,12 @@ function evaluateCibil(cibilObj, lenderCriteria, lenderPolicy = {}) {
         required: `CIBIL >= ${threshold}`
       };
     } else {
-      // No approved policy: return UNKNOWN
+      // Return UNKNOWN requesting fresh bureau report or surrogate assessment
       return {
         status: 'UNKNOWN',
         reason_code: 'EXACT_BUREAU_REQUIRED_NTC',
-        detail: 'Applicant has no credit score on file; lender requires bureau pull or surrogate assessment.',
-        missing_requirement: 'Credit Bureau verification report'
+        detail: 'Applicant has no credit score on file (NTC); lender requires bureau pull or surrogate income assessment.',
+        missing_requirement: 'Credit Bureau verification report or 6-month bank statement for NTC evaluation'
       };
     }
   }
@@ -96,6 +111,14 @@ function evaluateCibil(cibilObj, lenderCriteria, lenderPolicy = {}) {
 
     // Entire range below threshold
     if (high < threshold) {
+      if (hasOverride) {
+        return {
+          status: 'PASS',
+          matched: `Documented Credit Committee override approved for CIBIL bracket '${rawRange}' (max ${high} < ${threshold})`,
+          range: [low, high],
+          is_override: true
+        };
+      }
       return {
         status: 'FAIL',
         reason_code: 'CIBIL_RANGE_BELOW_MINIMUM',
@@ -105,7 +128,7 @@ function evaluateCibil(cibilObj, lenderCriteria, lenderPolicy = {}) {
       };
     }
 
-    // Range crosses the threshold (e.g. 700-900 with threshold 711, or 650-699 with threshold 651)
+    // Range straddles the threshold (e.g. 700-900 with threshold 711 or 721, or 650-699 with threshold 651)
     return {
       status: 'UNKNOWN',
       reason_code: 'NEEDS_EXACT_CIBIL_SCORE',
