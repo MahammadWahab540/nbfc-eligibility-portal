@@ -84,9 +84,10 @@ function normalizeApplicant(payload = {}, parameterQuestions = null) {
   };
 
   // 8. The 4 Verification Questions + Door Number
-  // Keep undefined as undefined if not explicitly provided!
+  const hasExplicitQuestions = Boolean(parameterQuestions || payload.parameter_questions);
   const qSource = parameterQuestions || payload.parameter_questions || {};
   const questions = {
+    is_skipped: !hasExplicitQuestions,
     is_pan_aadhaar_linked: qSource.is_pan_aadhaar_linked !== undefined
       ? Boolean(qSource.is_pan_aadhaar_linked)
       : undefined,
