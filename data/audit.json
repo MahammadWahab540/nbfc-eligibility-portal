@@ -1,0 +1,173 @@
+[
+  {
+    "id": "aud_40190b65",
+    "timestamp": "2026-11-02T04:56:59.694Z",
+    "user": "Risk Operations Manager",
+    "action": "UPDATE_CRITERIA",
+    "entity": "NBFC_RULES",
+    "details": "Activated partner Bajaj Finserv",
+    "version": "1.1.0"
+  },
+  {
+    "id": "aud_e8769747",
+    "timestamp": "2026-10-30T13:09:23.298Z",
+    "user": "Risk Operations Manager",
+    "action": "UPDATE_CRITERIA",
+    "entity": "NBFC_RULES",
+    "details": "Reordered partner priorities: northern_arc > bajaj > auxilo > fibe > gyandhan > techfino",
+    "version": "1.1.0"
+  },
+  {
+    "id": "aud_9f26f307",
+    "timestamp": "2026-10-30T13:09:18.104Z",
+    "user": "Risk Operations Manager",
+    "action": "UPDATE_CRITERIA",
+    "entity": "NBFC_RULES",
+    "details": "Reordered partner priorities: northern_arc > bajaj > fibe > gyandhan > auxilo > techfino",
+    "version": "1.1.0"
+  },
+  {
+    "id": "aud_f64ec706",
+    "timestamp": "2026-10-30T13:04:45.932Z",
+    "user": "Risk Operations Manager",
+    "action": "UPDATE_CRITERIA",
+    "entity": "NBFC_RULES",
+    "details": "Deactivated partner Bajaj Finserv",
+    "version": "1.1.0"
+  },
+  {
+    "id": "aud_903ff845",
+    "timestamp": "2026-10-30T13:03:54.646Z",
+    "user": "Risk Operations Manager",
+    "action": "UPDATE_CRITERIA",
+    "entity": "NBFC_RULES",
+    "details": "Reordered partner priorities: bajaj > northern_arc > fibe > gyandhan > auxilo > techfino",
+    "version": "1.1.0"
+  },
+  {
+    "id": "aud_a630d6d6",
+    "timestamp": "2026-10-30T07:10:22.513Z",
+    "user": "Risk Operations Manager",
+    "action": "UPDATE_CRITERIA",
+    "entity": "NBFC_RULES",
+    "details": "Reordered partner priorities: northern_arc > bajaj > fibe > gyandhan > auxilo > techfino",
+    "version": "1.1.0"
+  },
+  {
+    "id": "aud_ea805995",
+    "timestamp": "2026-10-30T07:10:19.846Z",
+    "user": "Risk Operations Manager",
+    "action": "UPDATE_CRITERIA",
+    "entity": "NBFC_RULES",
+    "details": "Reordered partner priorities: bajaj > fibe > gyandhan > northern_arc > auxilo > techfino",
+    "version": "1.1.0"
+  },
+  {
+    "id": "aud_437b24ae",
+    "timestamp": "2026-10-30T07:10:18.727Z",
+    "user": "Risk Operations Manager",
+    "action": "UPDATE_CRITERIA",
+    "entity": "NBFC_RULES",
+    "details": "Reordered partner priorities: fibe > bajaj > gyandhan > northern_arc > auxilo > techfino",
+    "version": "1.1.0"
+  },
+  {
+    "id": "aud_dc5d1cad",
+    "timestamp": "2026-10-30T07:10:17.630Z",
+    "user": "Risk Operations Manager",
+    "action": "UPDATE_CRITERIA",
+    "entity": "NBFC_RULES",
+    "details": "Reordered partner priorities: bajaj > fibe > gyandhan > northern_arc > auxilo > techfino",
+    "version": "1.1.0"
+  },
+  {
+    "id": "aud_b3a37350",
+    "timestamp": "2026-10-30T07:10:16.108Z",
+    "user": "Risk Operations Manager",
+    "action": "UPDATE_CRITERIA",
+    "entity": "NBFC_RULES",
+    "details": "Reordered partner priorities: fibe > bajaj > gyandhan > northern_arc > auxilo > techfino",
+    "version": "1.1.0"
+  },
+  {
+    "id": "aud_b0d1a680",
+    "timestamp": "2026-10-30T05:40:22.462Z",
+    "user": "Risk Operations Manager",
+    "action": "UPDATE_CRITERIA",
+    "entity": "NBFC_RULES",
+    "details": "Activated partner Bajaj Finserv",
+    "version": "1.1.0"
+  },
+  {
+    "id": "aud_26eb619b",
+    "timestamp": "2026-10-30T05:40:17.781Z",
+    "user": "Risk Operations Manager",
+    "action": "UPDATE_CRITERIA",
+    "entity": "NBFC_RULES",
+    "details": "Deactivated partner Bajaj Finserv",
+    "version": "1.1.0"
+  },
+  {
+    "id": "aud_e645480f",
+    "timestamp": "2026-10-30T05:40:05.187Z",
+    "user": "Risk Operations Manager",
+    "action": "UPDATE_CRITERIA",
+    "entity": "NBFC_RULES",
+    "details": "Reordered partner priorities: bajaj > fibe > gyandhan > northern_arc > auxilo > techfino",
+    "version": "1.1.0"
+  },
+  {
+    "id": "aud_2160fe39",
+    "timestamp": "2026-10-30T05:40:02.885Z",
+    "user": "Risk Operations Manager",
+    "action": "UPDATE_CRITERIA",
+    "entity": "NBFC_RULES",
+    "details": "Reordered partner priorities: fibe > gyandhan > bajaj > northern_arc > auxilo > techfino",
+    "version": "1.1.0"
+  },
+  {
+    "id": "aud_70b0ffcb",
+    "timestamp": "2026-10-30T05:39:54.918Z",
+    "user": "Risk Operations Manager",
+    "action": "UPDATE_CRITERIA",
+    "entity": "NBFC_RULES",
+    "details": "Reordered partner priorities: fibe > gyandhan > northern_arc > auxilo > techfino > bajaj",
+    "version": "1.1.0"
+  },
+  {
+    "id": "aud_3dd3a2ba",
+    "timestamp": "2026-10-30T05:35:39.348Z",
+    "user": "Risk Operations Manager",
+    "action": "UPDATE_CRITERIA",
+    "entity": "NBFC_RULES",
+    "details": "Reordered partner priorities: gyandhan > fibe > northern_arc > auxilo > techfino > bajaj",
+    "version": "1.1.0"
+  },
+  {
+    "id": "aud_617d6cc7",
+    "timestamp": "2026-10-30T05:35:36.293Z",
+    "user": "Risk Operations Manager",
+    "action": "UPDATE_CRITERIA",
+    "entity": "NBFC_RULES",
+    "details": "Reordered partner priorities: fibe > gyandhan > northern_arc > auxilo > techfino > bajaj",
+    "version": "1.1.0"
+  },
+  {
+    "id": "aud_init_001",
+    "timestamp": "2026-10-30T10:30:00Z",
+    "user": "System Administrator",
+    "action": "SYSTEM_INIT",
+    "entity": "NBFC_RULES",
+    "details": "Initial seed of 6 NBFC lending partner rule specifications from BDA NBFC Master sheet.",
+    "version": "1.0.0"
+  },
+  {
+    "id": "aud_init_002",
+    "timestamp": "2026-10-30T10:45:00Z",
+    "user": "Risk Management Ops",
+    "action": "CRITERIA_VERIFICATION",
+    "entity": "PARTNERS",
+    "details": "Normalized 11 parameters including regional exception matrices (Assam/Guwahati, CG/Raipur).",
+    "version": "1.1.0"
+  }
+]

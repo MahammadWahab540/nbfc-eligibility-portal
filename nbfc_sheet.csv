@@ -1,0 +1,43 @@
+Gyandhan,"CIBIL >710; Monthly Income ≥ ₹25,000; Age ≤58 years; Co-applicant = Blood relation / Mother; Rejected occupations: Politician, Practicing Lawyers & Law students, Lottery Agencies/Chit Fund, Film/TV Star, Anti-social elements (verification required); Rejected regions: J&K, Ladakh, Tripura, Meghalaya, Mizoram, Nagaland, Assam except Guwahati, Arunachal Pradesh, Andaman & Nicobar, Lakshadweep, Sikkim except Gangtok, Manipur; PAN & Aadhaar linked = Mandatory; E-PAN/Physical PAN = Mandatory; ; DOB mismatch = Not Allowed; Name mismatch = Not Allowed",,,,,,,,,,,,,
+Fibe ,"CIBIL >650; Monthly Income ≥ ₹15,000; Age ≤59 years; Co-applicant = Mother / Father / Grandfather / Siblings / Any relative; Rejected occupations: Politician, Freelancers; No specific state/region restriction; PAN & Aadhaar linked = Not Mandatory; E-PAN/Physical PAN = Not Mandatory; DOB mismatch = Not Mandatory; Name mismatch = Not Mandatory",,,,,,,,,,,,,
+Northern Arc,"CIBIL >650; Monthly Income ≥ ₹18,000; Age ≤58 years; Co-applicant = Mother / Father / Grandfather / Siblings / Any relative; Rejected occupations: Politician, Freelancers; No specific state/region restriction; PAN & Aadhaar linked = Not Mandatory; E-PAN/Physical PAN = Not Mandatory; DOB mismatch = Not Mandatory; Name mismatch = Mandatory",,,,,,,,,,,,,
+Auxilo,"CIBIL >650; Monthly Income ≥ ₹25,000; Age ≤58 years; Co-applicant = Mother / Father / Grandfather / Siblings / Legal Guardian; No rejected occupation specified; Rejected regions: J&K, Lakshadweep, Andaman & Nicobar, Meghalaya, Nagaland, Manipur, Tripura, Mizoram, Arunachal Pradesh, Chhattisgarh except Bhilai, Raipur, Durg & Bilaspur; PAN & Aadhaar linked = Mandatory; E-PAN/Physical PAN = Mandatory; DOB mismatch = Mandatory; Name mismatch = Mandatory",,,,,,,,,,,,,
+Techfino,"CIBIL >650; Monthly Income ≥ ₹25,000; Age ≤58 years; Co-applicant = Blood relation / Mother; No rejected occupation specified; Rejected regions: Jammu & Kashmir, Meghalaya, Nagaland, Andaman & Nicobar, Lakshadweep, Assam, Sikkim, Tripura; Door number = Mandatory; PAN & Aadhaar linked = Mandatory; E-PAN/Physical PAN = Mandatory; DOB mismatch = Not Allowed; Name mismatch = Not Allowed",,,,,,,,,,,,,
+Bajaj,"CIBIL >720; Monthly Income ≥ ₹15,000; Age ≤65 years; Co-applicant = Blood relation / Mother; Rejected occupations: Housewife, Student, Media, Politician, Celebrity; PAN & Aadhaar linked = Mandatory; E-PAN/Physical PAN = Mandatory; Non-nationalised bank = Mandatory; DOB mismatch = Not Allowed; Name mismatch = Not Allowed",,,,,,,,,,,,,
+,,,,,,,,,,,,,,
+Paramerter,Cibil,Income(M),Age,Co-applicant Relation,Rejected occupation,Rejected State/Region, PAN and Adhaar is to be linked,E-Pan/Physical PAN Availability,Non-Nationalised Bank Accepted,DOB mismatch in Adhaar and PAN,NAME mismatch in Adhaar and PAN,,,Field Question likhitha.nyasala@nxtwave.co.in
+Gyandhan,>710,25000,58,"Only blood relation- Mother, Father, Sibling","i. Politician or person affiliated to political parties 
+(Politically Exposed Persons)
+ii. Practicing Lawyers & student opting for Law course– 
+(Practicing in Taxation, Labour law can be considered). 
+iii. Lottery Agencies / Chit Fund 
+iv. Film/TVStar
+v. Anti-Social Elements as per verification report","Jammu & Kashmir 
+Ladakh 
+Tripura 
+Meghalaya 
+Mizoram 
+Nagaland 
+Assam except Guwahati 
+Arunachal Pradesh 
+Andaman & Nicobar 
+Lakshadweep 
+Sikkim except Gangtok 
+Manipur",Mandatory/ Yes,Mandatory/ Yes,Not Mandatory,they wont accept/ yes,they wont accept/yes,,,"Is Coapplicant PAn and Adhaar linked?
+
+Does Coapplicant have E-Pan or Physical PAN card?
+
+Does coapplicant date of birth on the Aadhaar card mismatch with the date of birth on the PAN card?
+
+Does coapplicant Name on the Aadhaar card mismatch with the Name on the PAN card?"
+Fibe ,>650,15000,59,"Mother, Father, Grandfather, Siblings
+Any relative works ","Politician, Freelancers, Gig workers (delivery boys, drivers etc.), Full Time Stock Market Traders/Investors",None,Not Mandatory/ No,Not Mandatory/ no ,Not Mandatory,will accept/no,will accept/no,,,
+Northern Arc,>675,0,58,"Only blood relation- Mother, Father, Sibling, Spouse",None,"J&K, North East India, Odissa",Not Mandatory/ No,Mandatory/ yes,Not Mandatory,they wont accept/yes,they wont accept/yes,,,
+Techfino,>650,25000,58,"Only blood relation- Mother, Father, Sibling",None,"Jammu, Kashmir, Meghalaya, Nagaland, Andaman, Lakshadweep, Assam, Sikkim, Tripura",Mandatory/ Yes,Mandatory/yes,UPI instead,they wont accept/ yes,they wont accept/yes,,,
+Bajaj,>720,15000,65,"Only blood relation- Mother, Father, Sibling","Housewife, Student, Media, Politician,, Celebrity,",None,Mandatory/ yes,Mandatory/yes,Mandatory,they wont accept/yes,they wont accept/yes,,,
+Auxilo,>650,25000,58,"Mother, Father, Grandfather, Siblings
+Legal gardians",None,"J&K, Lakshwadeep, Andaman and Nicobar, Meghalaya, Nagaland, Manipur, Tripura, Mizoram, Arunanchal Pradesh, Chhatisgarh (except Bhilai, Raipur, Durg, Bilaspur)",Mandatory/yes,Mandatory/yes,Mandatory,they wont accept/yes,they wont accept/yes,,,
+,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,
+All /Ideal criteria,CIBIL >720 AND Monthly Income ≥₹25K AND Age ≤58 AND Mother of Student AND PAN-Aadhaar Linked AND E-PAN/Physical PAN Available AND PAN-Aadhaar DOB Match AND PAN-Aadhaar Name Match AND Valid Bank Account/NACH Available AND Non-restricted Occupation AND Non-restricted Location,"Right Co-applicant (RCA): A co-applicant with CIBIL >720, monthly income ≥₹25,000, age ≤58 years, preferably the student's mother, PAN-Aadhaar linked, valid E-PAN/physical PAN available, matching DOB and name across PAN & Aadhaar, valid bank account/NACH capability, and no restricted occupation or location.",,,,,,,,,,,,

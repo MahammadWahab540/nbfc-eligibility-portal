@@ -1,0 +1,124 @@
+﻿NBFC Eligibility Configuration Portal with Salesforce Integration
+BRD: Centralised NBFC Eligibility Engine and Salesforce Integration
+1. Background and current process
+Currently, NBFC eligibility is determined using criteria defined for each lending partner. These criteria are evaluated using:
+* KYC-submitted lead and co-applicant information.
+* Four additional parameter questions captured in Salesforce during the No-Cost EMI task.
+* Individual NBFC eligibility rules, including applicable conditions and restrictions.
+The current approach requires eligibility logic and formulas to be configured directly within Salesforce. Consequently, any future change to an NBFC's eligibility criteria may require Salesforce formula, automation, or development changes, creating technical dependency and increasing maintenance effort.
+2. Business objective
+Develop a separate, centrally managed NBFC eligibility portal that evaluates the available applicant data against configurable NBFC-specific eligibility criteria and returns the list of eligible NBFCs to the KYC portal for user selection.
+The proposed solution must:
+1. Move NBFC eligibility criteria and rule evaluation outside Salesforce.
+2. Allow authorised business users to add, modify, activate, or deactivate NBFC eligibility rules through a portal interface without requiring code changes for routine rule updates.
+3. Automatically evaluate eligibility whenever the No-Cost EMI task is performed in Salesforce and the required data is available.
+4. Return the eligible NBFC list to the KYC portal for display through the relevant dropdown.
+5. Capture the selected NBFC and save that selection back to Salesforce.
+6. Retain the eligibility evaluation result in the separate portal for traceability and audit purposes.
+Expected outcome: Changes to business-defined NBFC eligibility criteria should be manageable by authorised business users without routine dependence on the technical team, provided the required data fields and rule operators are already supported by the eligibility engine.
+3. Proposed solution and system architecture
+The solution will consist of three components:
+* Salesforce (SF): Initiates the eligibility request and remains the source of truth for lead details, No-Cost EMI task inputs, selected NBFC, and related workflow status.
+* NBFC Eligibility Configuration Portal: Stores NBFC-specific criteria, evaluates the applicant's eligibility, and maintains the eligibility results.
+* KYC Portal: Receives the eligible NBFC options, displays them to the user through a dropdown, and returns the selected NBFC to Salesforce.
+3.1 Proposed end-to-end workflow
+Step 1 — Salesforce
+No-Cost EMI task is initiated. Retrieve KYC-submitted lead/co-applicant data and four parameter-question responses.
+Step 2 — Eligibility API
+Send the required data and unique lead/task reference to the separate portal through an API.
+Step 3 — NBFC Eligibility Portal
+Apply the active NBFC rules, evaluate conditions, and store the eligibility result with reasons.
+Step 4 — KYC Portal
+Receive and display only the eligible NBFCs in the relevant dropdown.
+Step 5 — Salesforce
+Return the user's selected NBFC to Salesforce and save it against the appropriate lead/task/application record.
+3.2 Process flow requirements
+1. The No-Cost EMI task is initiated in Salesforce.
+2. The system retrieves the applicable KYC-submitted lead and co-applicant data, along with the four existing parameter-question responses.
+3. Salesforce sends the required inputs to the eligibility portal through an API.
+4. The portal identifies the active NBFC rules applicable to the request.
+5. The eligibility engine evaluates the inputs against each NBFC's configured criteria.
+6. The portal stores the evaluation results and returns the eligible NBFC list with a unique evaluation/request ID.
+7. The KYC portal displays the returned NBFCs as selectable dropdown options.
+8. The user selects an eligible NBFC through the KYC portal.
+9. The selected NBFC and associated evaluation reference are sent back to Salesforce and saved against the correct record.
+10. The selection is validated against the corresponding eligibility result before it is accepted.
+11. The system maintains an audit trail of the criteria version, evaluation outcome, and selected NBFC.
+The Salesforce-to-portal integration and the portal-to-KYC-portal integration may be implemented directly or through an existing integration layer, subject to the technical team's architecture assessment. The business requirement is the same regardless of the implementation method.
+4. NBFC eligibility criteria configuration
+The separate portal must provide a business-user interface to manage the eligibility criteria for each NBFC.
+Logic doc - https://docs.google.com/spreadsheets/d/1qM_WD_ZtZ2KdGiDuIfxRzJNIuRQDo_Pxm0Fxi8ISZos/edit?gid=412107018#gid=412107018
+The above is the proposed configuration scope. The current approved eligibility logic for each NBFC must be mapped into the portal before migration; the technical team should not assume that every listed criterion applies to every lender.
+5. Business-user rule management
+The portal must allow authorised business users to:
+1. View all configured NBFCs and their current eligibility rules.
+2. Add or modify criteria using configurable fields, operators, and values.
+3. Activate or deactivate an NBFC's rule.
+4. Validate a proposed rule before activation.
+5. View the previous configuration and change history.
+6. Test a rule using sample inputs before publishing it.
+7. Roll back to a previous version, subject to appropriate permissions and audit logging.
+Key technical requirement: Eligibility conditions must not be hardcoded into Salesforce formulas, Apex, or workflow-specific decision logic. They must be stored as configuration data and interpreted by a reusable rule engine. Routine changes to supported conditions and comparison values must not require code deployment.
+6. Acceptance criteria and UAT scenarios
+The task will be considered complete only when the following scenarios are successfully tested.
+Test case
+	Expected result
+	UAT-01: Standard eligible lead
+	Correct eligible NBFCs are returned based on the configured criteria.
+	UAT-02: Multiple eligible NBFCs
+	All qualifying NBFCs are displayed in the KYC dropdown.
+	UAT-03: No eligible NBFCs
+	The KYC portal receives an empty list and handles it appropriately.
+	UAT-04: One criterion fails
+	The NBFC is excluded when a mandatory condition is not satisfied.
+	UAT-05: Missing required data
+	Evaluation returns the defined validation/incomplete-data outcome.
+	UAT-06: Four parameter questions
+	All four responses are correctly transmitted and evaluated.
+	UAT-07: Criteria changed by business user
+	Updating a supported criterion and activating the new version changes subsequent evaluation results without code deployment.
+	UAT-08: Rule deactivation
+	An inactive NBFC no longer appears in new eligible responses.
+	UAT-09: Selection callback
+	Selecting an eligible NBFC in the KYC portal updates the correct Salesforce record.
+	UAT-10: Invalid selection
+	A selection not present in the relevant eligible response is rejected.
+	UAT-11: Repeated API request
+	Duplicate requests do not create inconsistent or duplicate updates.
+	UAT-12: API failure and retry
+	Failures are logged and retried/reconciled according to the agreed policy.
+	UAT-13: Data change
+	A relevant change to applicant data triggers or requires a fresh evaluation before a new selection.
+	UAT-14: Audit trail
+	The evaluation result, criteria version, reasons and selection reference can be retrieved.
+	UAT-15: Regression comparison
+	Existing and new implementations return equivalent results for an agreed set of test cases, except for approved differences.
+	7. Implementation approach
+The recommended delivery sequence is:
+1. Phase 1 — Existing logic mapping
+
+Document the current eligibility criteria for every NBFC, the four parameter questions, the Salesforce fields used, and the expected output for representative test cases.
+
+2. Phase 2 — Portal and rule-engine development
+
+Build the configurable NBFC criteria interface, reusable rule evaluator, version management, evaluation storage and audit capabilities.
+
+3. Phase 3 — API integration
+
+Implement the Salesforce request, eligibility response and KYC selection callback contracts.
+
+4. Phase 4 — Testing and parallel validation
+
+Compare the portal's results against the existing Salesforce logic using representative leads and boundary cases. Resolve discrepancies before migration.
+
+5. Phase 5 — Go-live
+
+Enable the new flow, monitor evaluation accuracy and API reliability, and retain a controlled rollback plan.
+
+8. Expected business benefits
+   * Reduced Salesforce dependency: Eligibility formulas and criteria will no longer need to be individually hardcoded in Salesforce for routine rule changes.
+   * Faster partner updates: Business users can update supported eligibility conditions directly in the portal.
+   * Consistent eligibility decisions: All NBFCs will be evaluated using a centralised, standardised process.
+   * Improved traceability: Historical decisions can be linked to the exact criteria version used.
+   * Reduced maintenance effort: Fewer Salesforce changes will be needed when NBFC criteria evolve.
+   * Improved operational accuracy: The KYC dropdown will be driven by the evaluated eligibility result rather than separate hardcoded lists or duplicated logic.

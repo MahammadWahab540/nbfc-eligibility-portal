@@ -1,0 +1,471 @@
+/* Apple-Grade Physics & Animation System */
+/* Compliant with Disney's 12 Principles adapted for modern web interfaces */
+
+:root {
+  /* -------------------------------------------------------------------------
+     1. COLOR SYSTEM (APPLE LIGHT HIGHER CONTRAST)
+     ------------------------------------------------------------------------- */
+  --apple-bg: #f5f5f7;
+  --apple-card: #ffffff;
+  --apple-card-hover: #ffffff;
+  --apple-card-border: rgba(0, 0, 0, 0.06);
+  --apple-card-border-hover: rgba(0, 0, 0, 0.14);
+  --apple-text-primary: #1d1d1f;
+  --apple-text-secondary: #515154;
+  --apple-text-tertiary: #86868b;
+  --apple-blue: #0071e3;
+  --apple-blue-hover: #0077ed;
+  --apple-blue-light: #eef6ff;
+  --apple-green: #34c759;
+  --apple-green-light: #effaf1;
+  --apple-amber: #f59e0b;
+  --apple-amber-light: #fffbeb;
+  --apple-red: #ef4444;
+  --apple-red-light: #fef2f2;
+  --apple-gray-chip: #f1f1f4;
+  --apple-font: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+
+  /* -------------------------------------------------------------------------
+     2. MOTION & ANIMATION TOKENS (12 PRINCIPLES STANDARDS)
+     ------------------------------------------------------------------------- */
+  /* Timing: Strict < 300ms ceiling for user-initiated interactions */
+  --duration-instant: 100ms;
+  --duration-fast: 150ms;
+  --duration-standard: 220ms;
+  --duration-entrance: 260ms;
+
+  /* Easing curves */
+  /* Arrival (Ease-Out): Enters fast, settles smoothly without abrupt stop */
+  --ease-entrance: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Departure (Ease-In): Builds momentum before vanishing */
+  --ease-exit: cubic-bezier(0.7, 0, 0.84, 0);
+  /* Spring feel: Subtle physical overshoot and settle */
+  --ease-spring: cubic-bezier(0.34, 1.3, 0.64, 1);
+  /* Fluid interactive toggle */
+  --ease-fluid: cubic-bezier(0.25, 1, 0.5, 1);
+
+  /* Physics: Scale transforms for squash & stretch */
+  --scale-press: 0.97;
+  --scale-press-subtle: 0.985;
+}
+
+body {
+  background-color: var(--apple-bg);
+  color: var(--apple-text-primary);
+  font-family: var(--apple-font);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.015em;
+}
+
+/* =========================================================================
+   SURFACE CARDS (PHYSICAL ELEVATION & MOMENTUM)
+   ========================================================================= */
+.apple-card {
+  background: var(--apple-card);
+  border: 1px solid var(--apple-card-border);
+  border-radius: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02), 0 4px 14px rgba(0, 0, 0, 0.02);
+  transition: transform var(--duration-standard) var(--ease-entrance),
+              box-shadow var(--duration-standard) var(--ease-entrance),
+              border-color var(--duration-standard) var(--ease-entrance);
+  will-change: transform, box-shadow;
+}
+
+.apple-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--apple-card-border-hover);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+/* Drag and Drop Physics (Squash and Tension) */
+.apple-card.is-dragging {
+  opacity: 0.4;
+  transform: scale(0.96);
+  border: 1.5px dashed var(--apple-blue);
+  box-shadow: none;
+  transition: all var(--duration-fast) var(--ease-fluid);
+}
+
+.apple-card.drag-over {
+  border-color: var(--apple-blue);
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.18), 0 12px 28px rgba(0, 113, 227, 0.12);
+  transform: translateY(-4px) scale(1.01);
+  transition: all var(--duration-fast) var(--ease-spring);
+}
+
+.drag-handle {
+  cursor: grab;
+  user-select: none;
+  transition: transform var(--duration-instant) ease;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+  transform: scale(0.9);
+}
+
+/* =========================================================================
+   INTERACTIVE SEGMENTED TABS (FLUID SWITCHING)
+   ========================================================================= */
+.apple-segmented-group {
+  background: rgba(118, 118, 128, 0.09);
+  padding: 4px;
+  border-radius: 14px;
+  display: inline-flex;
+}
+
+.apple-tab-btn {
+  padding: 7px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--apple-text-secondary);
+  border-radius: 10px;
+  transition: transform var(--duration-fast) var(--ease-fluid),
+              background var(--duration-fast) var(--ease-fluid),
+              color var(--duration-fast) var(--ease-fluid),
+              box-shadow var(--duration-fast) var(--ease-fluid);
+  display: inline-flex;
+  align-items: center;
+  user-select: none;
+  cursor: pointer;
+}
+
+.apple-tab-btn:hover {
+  color: var(--apple-text-primary);
+}
+
+.apple-tab-btn:active {
+  transform: scale(var(--scale-press));
+}
+
+.apple-tab-btn.active-tab {
+  background: #ffffff;
+  color: var(--apple-text-primary);
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08), 0 0.5px 1px rgba(0, 0, 0, 0.04);
+}
+
+/* =========================================================================
+   BUTTONS (PHYSICAL FEEDBACK: SQUASH ON TAP, SPRING RESTORE)
+   ========================================================================= */
+.apple-btn-primary {
+  background: var(--apple-blue);
+  color: #ffffff;
+  font-weight: 600;
+  border-radius: 980px;
+  padding: 8px 20px;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--duration-fast) var(--ease-spring),
+              background var(--duration-fast) ease,
+              box-shadow var(--duration-fast) var(--ease-entrance);
+  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.22);
+  cursor: pointer;
+  user-select: none;
+}
+
+.apple-btn-primary:hover {
+  background: var(--apple-blue-hover);
+  box-shadow: 0 5px 16px rgba(0, 113, 227, 0.32);
+  transform: translateY(-0.5px);
+}
+
+.apple-btn-primary:active {
+  transform: scale(var(--scale-press));
+  box-shadow: 0 1px 4px rgba(0, 113, 227, 0.18);
+}
+
+.apple-btn-secondary {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: var(--apple-text-primary);
+  font-weight: 600;
+  border-radius: 980px;
+  padding: 7px 16px;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--duration-fast) var(--ease-spring),
+              background var(--duration-fast) ease,
+              border-color var(--duration-fast) ease;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.apple-btn-secondary:hover {
+  background: #f8f8fa;
+  border-color: rgba(0, 0, 0, 0.18);
+  transform: translateY(-0.5px);
+}
+
+.apple-btn-secondary:active {
+  transform: scale(var(--scale-press));
+}
+
+/* =========================================================================
+   TAG PILLS (INTERACTIVE TENSION FEEDBACK)
+   ========================================================================= */
+.tag-pill {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  color: #4b5563;
+  transition: transform var(--duration-fast) var(--ease-spring),
+              background var(--duration-fast) ease,
+              border-color var(--duration-fast) ease,
+              color var(--duration-fast) ease;
+  user-select: none;
+}
+
+.tag-pill:hover {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+}
+
+.tag-pill:active {
+  transform: scale(0.94);
+}
+
+.tag-pill.active {
+  background: var(--apple-blue);
+  border-color: var(--apple-blue);
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 113, 227, 0.25);
+}
+
+.tag-pill-danger.active {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.25);
+}
+
+/* =========================================================================
+   BADGES & CHIPS
+   ========================================================================= */
+.apple-chip {
+  padding: 4px 9px;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  transition: all var(--duration-fast) ease;
+}
+
+.chip-neutral {
+  background: var(--apple-gray-chip);
+  color: #4b5563;
+  border: 1px solid #e5e7eb;
+}
+
+.chip-success {
+  background: var(--apple-green-light);
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.chip-blue {
+  background: var(--apple-blue-light);
+  color: #0284c7;
+  border: 1px solid #bae6fd;
+}
+
+.chip-amber {
+  background: var(--apple-amber-light);
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.chip-red {
+  background: var(--apple-red-light);
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+/* =========================================================================
+   INPUTS & CONTROLS
+   ========================================================================= */
+.apple-input {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+  padding: 9px 13px;
+  font-size: 13px;
+  color: var(--apple-text-primary);
+  outline: none;
+  transition: border-color var(--duration-fast) var(--ease-fluid),
+              box-shadow var(--duration-fast) var(--ease-fluid);
+  width: 100%;
+}
+
+.apple-input:focus {
+  border-color: var(--apple-blue);
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.12);
+}
+
+/* Apple Switch (Toggle) with Physical Spring Travel */
+.apple-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 26px;
+}
+
+.apple-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.apple-switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #e5e5ea;
+  transition: background-color var(--duration-standard) var(--ease-fluid);
+  border-radius: 34px;
+}
+
+.apple-switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: transform var(--duration-standard) var(--ease-spring);
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+input:checked + .apple-switch-slider {
+  background-color: var(--apple-green);
+}
+
+input:checked + .apple-switch-slider:before {
+  transform: translateX(18px);
+}
+
+/* Checkbox with physical check snap */
+.apple-checkbox {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid #d1d1d6;
+  border-radius: 6px;
+  outline: none;
+  cursor: pointer;
+  display: inline-grid;
+  place-content: center;
+  transition: transform var(--duration-instant) var(--ease-spring),
+              background var(--duration-fast) ease,
+              border-color var(--duration-fast) ease;
+  background: white;
+}
+
+.apple-checkbox:active {
+  transform: scale(0.9);
+}
+
+.apple-checkbox:checked {
+  background-color: var(--apple-blue);
+  border-color: var(--apple-blue);
+}
+
+.apple-checkbox:checked::before {
+  content: "";
+  width: 9px;
+  height: 5px;
+  border-left: 2px solid white;
+  border-bottom: 2px solid white;
+  transform: rotate(-45deg) translate(1px, -1px);
+}
+
+/* Monogram Badges */
+.lender-monogram {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 15px;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: transform var(--duration-fast) var(--ease-spring);
+}
+
+.apple-card:hover .lender-monogram {
+  transform: scale(1.05);
+}
+
+.mono-fibe { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+.mono-gyandhan { background: linear-gradient(135deg, #4f46e5, #4338ca); }
+.mono-northern { background: linear-gradient(135deg, #7c3aed, #6d28d9); }
+.mono-auxilo { background: linear-gradient(135deg, #059669, #047857); }
+.mono-techfino { background: linear-gradient(135deg, #0284c7, #0369a1); }
+.mono-bajaj { background: linear-gradient(135deg, #d97706, #b45309); }
+
+.tabular-numbers {
+  font-variant-numeric: tabular-nums;
+}
+
+/* =========================================================================
+   STAGING & ENTRANCES (DISNEY PRINCIPLES #4 & #8: SLOW-IN / SLOW-OUT)
+   ========================================================================= */
+@keyframes appleEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.99);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.fade-in {
+  animation: appleEntrance var(--duration-entrance) var(--ease-entrance) forwards;
+}
+
+/* Stagger Children Micro-Delays (< 40ms per item) */
+.stagger-1 { animation-delay: 20ms; }
+.stagger-2 { animation-delay: 50ms; }
+.stagger-3 { animation-delay: 80ms; }
+.stagger-4 { animation-delay: 110ms; }
+
+/* Modal Staging & Backdrop Dimming */
+.modal-overlay {
+  transition: opacity var(--duration-standard) var(--ease-entrance);
+}
+
+.modal-content {
+  transition: transform var(--duration-entrance) var(--ease-spring),
+              opacity var(--duration-standard) var(--ease-entrance);
+}
+
+/* =========================================================================
+   ACCESSIBILITY: RESPECT USER REDUCED MOTION SETTINGS
+   ========================================================================= */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

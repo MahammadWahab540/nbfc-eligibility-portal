@@ -1,0 +1,41 @@
+{
+  "event_type": "KYC_SUBMISSION",
+  "user_details": {
+    "phone_number": "9705334008",
+    "user_id": "e0a5860a-462b-41c9-9e24-7daff87f1367",
+    "country_code": "+91"
+  },
+  "co_applicant_details": {
+    "name": "Kuna Kavitha",
+    "age": "43",
+    "state": "Telangana",
+    "city": "Hyderabad",
+    "email": "kavithakuna214@gmail.com",
+    "relation": "Mother",
+    "phone_number": "9381461252"
+  },
+  "cibil_details": {
+    "cibil_score": 735,
+    "cibil_score_range": "700 - 900"
+  },
+  "employment_details": {
+    "employment_type": "SELF_EMPLOYED",
+    "monthly_income": 45000,
+    "occupation": "SHOP_OWNER"
+  },
+  "bank_details": {
+    "bank_name": "OTHER",
+    "banking_facilities": "BOTH_DEBIT_CARD_AND_INTERNET_BANKING"
+  },
+  "address_details": {
+    "door_number": "12-4/A"
+  },
+  "parameter_questions": {
+    "is_pan_aadhaar_linked": true,
+    "has_e_pan_or_physical_pan": true,
+    "has_dob_mismatch": false,
+    "has_name_mismatch": false,
+    "has_door_number": true
+  },
+  "selected_emi_tenure": 36
+}

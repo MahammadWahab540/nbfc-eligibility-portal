@@ -1,0 +1,9 @@
+{
+  "cibil_bracket_policy": "CONSERVATIVE",
+  "auto_fallback_upi": true,
+  "enforce_door_number": true,
+  "default_loan_tenure": 36,
+  "salesforce_webhook_url": "https://nxtwave.my.salesforce.com/services/apexrest/nbfc/v1/selection",
+  "enable_shadow_evaluation": false,
+  "max_suggestions_count": 5
+}

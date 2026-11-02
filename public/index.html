@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NBFC Partner Portal · Credit Policies & Prioritisation</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="min-h-screen flex flex-col bg-[#f5f5f7] text-[#1d1d1f] selection:bg-blue-100 selection:text-blue-900 font-sans antialiased">
+
+  <!-- Apple Frosted Top Header -->
+  <header class="sticky top-0 z-40 bg-white/85 backdrop-blur-xl border-b border-black/[0.06] transition-all">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand & Product Identity -->
+      <div class="flex items-center space-x-3.5">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-slate-900 to-slate-700 flex items-center justify-center text-white shadow-sm ring-1 ring-black/5">
+          <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="text-sm font-bold tracking-tight text-slate-900">NBFC Partner Portal</span>
+            <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-blue-50 text-blue-700 border border-blue-200/60">Education Loans</span>
+          </div>
+          <p class="text-[11px] text-slate-500 font-normal">Credit policy rules, lender prioritization & applicant matching</p>
+        </div>
+      </div>
+
+      <!-- Segmented Navigation (Desktop) -->
+      <div class="hidden md:flex apple-segmented-group">
+        <button class="apple-tab-btn active-tab" data-tab="tab-partners">
+          <svg class="w-3.5 h-3.5 mr-1.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+          Lenders & Prioritisation
+        </button>
+        <button class="apple-tab-btn" data-tab="tab-simulator">
+          <svg class="w-3.5 h-3.5 mr-1.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          Check Eligibility
+        </button>
+        <button class="apple-tab-btn" data-tab="tab-settings">
+          <svg class="w-3.5 h-3.5 mr-1.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          Preferences
+        </button>
+        <button class="apple-tab-btn" data-tab="tab-audit">
+          <svg class="w-3.5 h-3.5 mr-1.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          Change History
+        </button>
+      </div>
+
+      <!-- Live Operational Status -->
+      <div class="flex items-center space-x-2">
+        <div class="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-semibold border border-emerald-200/80 shadow-xs">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>Engine Active</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Segmented Navigation (Mobile) -->
+    <div class="flex md:hidden px-4 pb-3 overflow-x-auto">
+      <div class="apple-segmented-group w-full justify-between">
+        <button class="apple-tab-btn active-tab flex-1 text-center justify-center text-xs" data-tab="tab-partners">Lenders</button>
+        <button class="apple-tab-btn flex-1 text-center justify-center text-xs" data-tab="tab-simulator">Check</button>
+        <button class="apple-tab-btn flex-1 text-center justify-center text-xs" data-tab="tab-settings">Settings</button>
+        <button class="apple-tab-btn flex-1 text-center justify-center text-xs" data-tab="tab-audit">History</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- ================================================================= -->
+    <!-- TAB 1: LENDING PARTNERS & PRIORITISATION -->
+    <!-- ================================================================= -->
+    <section id="tab-partners" class="tab-content block space-y-6 fade-in">
+      
+      <!-- Executive Overview Banner Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <div class="apple-card p-5">
+          <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Active Lending Partners</span>
+          <div id="stat-active-partners" class="text-2xl font-extrabold text-slate-900 mt-1 tabular-numbers">6 Lenders</div>
+          <p class="text-xs text-slate-500 mt-1">Configured for student loan routing</p>
+        </div>
+
+        <div class="apple-card p-5">
+          <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Lowest Credit Score Accepted</span>
+          <div class="text-2xl font-extrabold text-blue-600 mt-1 tabular-numbers">650+</div>
+          <p class="text-xs text-slate-500 mt-1">Fibe, Northern Arc, Auxilo & Techfino</p>
+        </div>
+
+        <div class="apple-card p-5">
+          <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Minimum Monthly Income</span>
+          <div class="text-2xl font-extrabold text-slate-900 mt-1 tabular-numbers">₹15,000</div>
+          <p class="text-xs text-slate-500 mt-1">Accessible for entry-level family incomes</p>
+        </div>
+
+        <div class="apple-card p-5">
+          <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Live Policy Updates</span>
+          <div class="text-2xl font-extrabold text-emerald-600 mt-1">Real-time</div>
+          <p class="text-xs text-slate-500 mt-1">Adjust cutoffs without technical help</p>
+        </div>
+
+      </div>
+
+      <!-- Section Title & Instructions -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-2">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900 tracking-tight">Lending Partners & Priority Sequence</h2>
+          <p class="text-xs text-slate-500">When a student applies, lenders are evaluated and offered in this priority order. Drag cards or use the arrows to adjust routing.</p>
+        </div>
+        <div class="text-xs text-slate-600 font-medium flex items-center space-x-1.5 bg-white px-3.5 py-1.5 rounded-full border border-slate-200/80 shadow-xs">
+          <span class="text-blue-600 font-bold">Tip:</span>
+          <span>Higher priority lenders get first choice on qualified students</span>
+        </div>
+      </div>
+
+      <!-- Partner Cards Grid -->
+      <div id="partners-container" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="p-12 text-center text-slate-400 col-span-2">Loading lending partner guidelines...</div>
+      </div>
+
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- TAB 2: ELIGIBILITY CHECKER (SIMULATOR) -->
+    <!-- ================================================================= -->
+    <section id="tab-simulator" class="tab-content hidden space-y-6 fade-in">
+      
+      <!-- Clean Introductory Callout -->
+      <div class="apple-card p-5 bg-gradient-to-r from-blue-50/60 via-indigo-50/30 to-white border-blue-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-base font-bold text-slate-900 tracking-tight">Evaluate Student & Co-Applicant Eligibility</h2>
+          <p class="text-xs text-slate-600 mt-0.5 max-w-2xl">
+            Test any applicant profile across all active lending partners. The engine instantly identifies qualified lenders, flags document requirements, and suggests the best match.
+          </p>
+        </div>
+        <button id="btn-reset-sample" class="apple-btn-secondary text-xs whitespace-nowrap self-start sm:self-auto">
+          Load Sample Profile (Kavitha)
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- Left: Applicant Profile & Document Verification (5 Cols) -->
+        <div class="lg:col-span-5 space-y-4">
+          
+          <div class="apple-card p-6 space-y-5">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Applicant & Family Profile</h3>
+              <span class="text-[11px] text-slate-400">Step 1 of 2</span>
+            </div>
+
+            <!-- Form Fields -->
+            <div class="space-y-3.5 text-xs">
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-slate-700 font-semibold mb-1">Co-Applicant Name</label>
+                  <input type="text" id="sim-input-name" class="apple-input" value="Kuna Kavitha">
+                </div>
+                <div>
+                  <label class="block text-slate-700 font-semibold mb-1">Relationship to Student</label>
+                  <select id="sim-input-relation" class="apple-input font-medium">
+                    <option value="Mother" selected>Mother</option>
+                    <option value="Father">Father</option>
+                    <option value="Sibling">Brother / Sister (Sibling)</option>
+                    <option value="Spouse">Spouse</option>
+                    <option value="Grandfather">Grandparent</option>
+                    <option value="Legal Guardian">Legal Guardian</option>
+                    <option value="Other Relative">Other Relative</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-slate-700 font-semibold mb-1">Co-Applicant Age</label>
+                  <input type="number" id="sim-input-age" class="apple-input font-medium" value="43">
+                </div>
+                <div>
+                  <label class="block text-slate-700 font-semibold mb-1">Credit Score (CIBIL)</label>
+                  <input type="number" id="sim-input-cibil" class="apple-input font-medium" value="735" placeholder="e.g. 735">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-slate-700 font-semibold mb-1">Monthly Income (₹)</label>
+                  <input type="number" id="sim-input-income" class="apple-input font-medium" value="45000">
+                </div>
+                <div>
+                  <label class="block text-slate-700 font-semibold mb-1">Occupation</label>
+                  <select id="sim-input-occupation" class="apple-input font-medium">
+                    <option value="SHOP_OWNER" selected>Shop Owner / Self-Employed</option>
+                    <option value="SALARIED_PRIVATE">Salaried Professional</option>
+                    <option value="FREELANCER">Freelancer / Independent</option>
+                    <option value="HOUSEWIFE">Homemaker</option>
+                    <option value="POLITICIAN">Political / Government Official</option>
+                    <option value="LAWYER">Lawyer / Legal Profession</option>
+                    <option value="STUDENT">Student</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-slate-700 font-semibold mb-1">State / Location</label>
+                  <input type="text" id="sim-input-state" class="apple-input font-medium" value="Telangana">
+                </div>
+                <div>
+                  <label class="block text-slate-700 font-semibold mb-1">Bank Account Type</label>
+                  <select id="sim-input-bank-type" class="apple-input font-medium">
+                    <option value="OTHER" selected>Co-operative / Small Bank (OTHER)</option>
+                    <option value="HDFC">Nationalised / Major Bank (HDFC, SBI, etc.)</option>
+                  </select>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Verification & Document Status Section -->
+            <div class="p-4 rounded-xl bg-slate-50/80 border border-slate-200/70 space-y-3">
+              <span class="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">Document Verification Checks</span>
+              
+              <label class="flex items-center justify-between text-xs cursor-pointer select-none">
+                <span class="text-slate-700 font-medium">PAN and Aadhaar are linked</span>
+                <input type="checkbox" id="sim-q-pan-aadhaar" checked class="apple-checkbox">
+              </label>
+
+              <label class="flex items-center justify-between text-xs cursor-pointer select-none">
+                <span class="text-slate-700 font-medium">Original PAN card available (Physical or e-PAN)</span>
+                <input type="checkbox" id="sim-q-pan-avail" checked class="apple-checkbox">
+              </label>
+
+              <label class="flex items-center justify-between text-xs cursor-pointer select-none">
+                <span class="text-slate-700 font-medium">Birth dates match exactly on PAN & Aadhaar</span>
+                <input type="checkbox" id="sim-q-dob-match" checked class="apple-checkbox">
+              </label>
+
+              <label class="flex items-center justify-between text-xs cursor-pointer select-none">
+                <span class="text-slate-700 font-medium">Full names match exactly on PAN & Aadhaar</span>
+                <input type="checkbox" id="sim-q-name-match" checked class="apple-checkbox">
+              </label>
+
+              <label class="flex items-center justify-between text-xs cursor-pointer select-none">
+                <span class="text-slate-700 font-medium">House / Door number present on address proof</span>
+                <input type="checkbox" id="sim-q-door-num" checked class="apple-checkbox">
+              </label>
+            </div>
+
+            <!-- Primary Action -->
+            <button id="btn-run-simulation" class="w-full apple-btn-primary py-3 text-sm font-semibold shadow-md">
+              Run Eligibility Check
+            </button>
+
+          </div>
+
+        </div>
+
+        <!-- Right: Results & Recommendations (7 Cols) -->
+        <div class="lg:col-span-7 space-y-4">
+          
+          <div class="apple-card p-6 space-y-5">
+            
+            <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div>
+                <h3 class="text-sm font-bold text-slate-900 tracking-tight">Assessment Results</h3>
+                <p id="sim-eval-id" class="text-xs text-slate-400 mt-0.5">Click "Run Eligibility Check" to view results</p>
+              </div>
+              <div id="sim-badges" class="flex items-center space-x-2"></div>
+            </div>
+
+            <!-- Dynamic Output Container -->
+            <div id="sim-results-container" class="space-y-4 min-h-[320px]">
+              <div class="flex flex-col items-center justify-center py-20 text-center text-slate-400 space-y-2">
+                <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                </div>
+                <div class="text-sm font-semibold text-slate-700">Ready to Evaluate</div>
+                <p class="text-xs text-slate-400 max-w-sm">
+                  Click the blue button on the left to see which lending partners can approve this applicant and why.
+                </p>
+              </div>
+            </div>
+
+            <!-- Simulated Selection -->
+            <div id="sim-selection-box" class="hidden p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+              <div>
+                <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Select Lending Partner for Student</h4>
+                <p class="text-xs text-slate-500">Pick an approved lender to proceed with loan sanctioning.</p>
+              </div>
+              <div class="flex items-center space-x-3">
+                <select id="sim-dropdown-nbfc" class="apple-input flex-1 font-medium"></select>
+                <button id="btn-submit-selection" class="apple-btn-primary whitespace-nowrap">Assign & Confirm</button>
+              </div>
+              <div id="sim-selection-result" class="text-xs"></div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- TAB 3: SYSTEM PREFERENCES -->
+    <!-- ================================================================= -->
+    <section id="tab-settings" class="tab-content hidden max-w-2xl mx-auto space-y-6 fade-in">
+      
+      <div class="apple-card p-7 space-y-6">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900 tracking-tight">System Preferences</h2>
+          <p class="text-xs text-slate-500 mt-1">Configure default loan terms, credit bureau interpretations, and notification webhooks.</p>
+        </div>
+
+        <form id="settings-form" class="space-y-5">
+          
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+              Credit Score Range Handling
+            </label>
+            <p class="text-xs text-slate-500 mb-2">When a student's credit report shows a range (e.g., "700 – 900") instead of an exact score:</p>
+            <select id="set-cibil-policy" class="apple-input font-medium">
+              <option value="CONSERVATIVE">Safe / Conservative (Evaluates using the lower score: e.g. 700)</option>
+              <option value="OPTIMISTIC">Aggressive / Optimistic (Evaluates using the top score: e.g. 900)</option>
+              <option value="MIDPOINT">Balanced (Evaluates using the midpoint: e.g. 800)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+              Standard Loan Duration (Tenure)
+            </label>
+            <div class="flex items-center space-x-3">
+              <input type="number" id="set-tenure" value="36" class="apple-input font-medium max-w-[120px]">
+              <span class="text-xs text-slate-600 font-medium">Months (3 Years)</span>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+              CRM Notification Endpoint
+            </label>
+            <input type="url" id="set-webhook" class="apple-input" placeholder="https://api.yourcompany.com/webhook/loan-selected">
+            <p class="text-xs text-slate-400 mt-1">Receives an automated alert whenever an applicant confirms a lending partner.</p>
+          </div>
+
+          <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+            <span id="settings-save-status" class="text-xs font-semibold text-emerald-600"></span>
+            <button type="submit" class="apple-btn-primary">Save Preferences</button>
+          </div>
+
+        </form>
+      </div>
+
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- TAB 4: AUDIT TRAIL & HISTORY -->
+    <!-- ================================================================= -->
+    <section id="tab-audit" class="tab-content hidden space-y-5 fade-in">
+      
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900 tracking-tight">Policy Change History</h2>
+          <p class="text-xs text-slate-500">Every change made to lending rules is logged with user details and exact timestamps.</p>
+        </div>
+        <button id="btn-refresh-audit" class="apple-btn-secondary text-xs">Refresh History</button>
+      </div>
+
+      <div class="apple-card overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead>
+              <tr class="bg-slate-50/90 border-b border-slate-100 text-slate-500 uppercase tracking-wider text-[10px] font-bold">
+                <th class="py-3.5 px-5">Date & Time</th>
+                <th class="py-3.5 px-5">Team Member</th>
+                <th class="py-3.5 px-5">Action</th>
+                <th class="py-3.5 px-5">Change Description</th>
+                <th class="py-3.5 px-5">Version</th>
+              </tr>
+            </thead>
+            <tbody id="audit-logs-tbody" class="divide-y divide-slate-100 font-medium">
+              <!-- Rendered via app.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ================================================================= -->
+  <!-- APPLE MODAL: EDIT LENDER GUIDELINES -->
+  <!-- ================================================================= -->
+  <div id="edit-modal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-black/[0.08] overflow-hidden fade-in">
+      
+      <!-- Modal Header -->
+      <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
+        <div>
+          <h3 id="modal-partner-name" class="text-base font-bold text-slate-900 tracking-tight">Edit Lending Guidelines</h3>
+          <p class="text-xs text-slate-500 mt-0.5">Updated criteria apply instantly to new applicant checks.</p>
+        </div>
+        <button id="btn-close-modal" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-full hover:bg-slate-200/60 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Modal Body (Form) -->
+      <form id="edit-partner-form" class="p-6 overflow-y-auto space-y-5 text-xs">
+        <input type="hidden" id="edit-partner-id">
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Minimum CIBIL Score</label>
+            <input type="number" id="edit-cibil" class="apple-input font-medium" required>
+            <span class="text-[10px] text-slate-400">e.g. 651 for >650</span>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Min Monthly Income (₹)</label>
+            <input type="number" id="edit-income" class="apple-input font-medium" required>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Max Co-Applicant Age</label>
+            <input type="number" id="edit-age" class="apple-input font-medium" required>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1.5">Permitted Family Relationships</label>
+          <div id="edit-relations-tags" class="flex flex-wrap gap-1.5">
+            <!-- Rendered as interactive pills -->
+          </div>
+          <input type="hidden" id="edit-relations">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1.5">Excluded Occupations (Negative List)</label>
+          <div id="edit-occupations-tags" class="flex flex-wrap gap-1.5">
+            <!-- Rendered as interactive pills -->
+          </div>
+          <input type="hidden" id="edit-occupations">
+        </div>
+
+        <!-- Verification Checklist -->
+        <div class="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 space-y-2.5">
+          <div class="font-bold text-slate-800 text-[11px] uppercase tracking-wider">Verification Requirements</div>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-700">
+            <label class="flex items-center space-x-2 cursor-pointer select-none">
+              <input type="checkbox" id="edit-pan-linked" class="apple-checkbox">
+              <span>PAN & Aadhaar must be linked</span>
+            </label>
+
+            <label class="flex items-center space-x-2 cursor-pointer select-none">
+              <input type="checkbox" id="edit-pan-avail" class="apple-checkbox">
+              <span>Original PAN card required</span>
+            </label>
+
+            <label class="flex items-center space-x-2 cursor-pointer select-none">
+              <input type="checkbox" id="edit-coop-bank" class="apple-checkbox">
+              <span>Accept Co-op / Rural Bank</span>
+            </label>
+
+            <label class="flex items-center space-x-2 cursor-pointer select-none">
+              <input type="checkbox" id="edit-door-num" class="apple-checkbox">
+              <span>Street / Door number mandatory</span>
+            </label>
+
+            <label class="flex items-center space-x-2 cursor-pointer select-none">
+              <input type="checkbox" id="edit-dob-mismatch" class="apple-checkbox">
+              <span>Allow Birth Date Mismatch</span>
+            </label>
+
+            <label class="flex items-center space-x-2 cursor-pointer select-none">
+              <input type="checkbox" id="edit-name-mismatch" class="apple-checkbox">
+              <span>Allow Name Mismatch</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Restricted States / Regions</label>
+          <input type="text" id="edit-regions" class="apple-input" placeholder="e.g. J&K, Nagaland, Tripura">
+          <span class="text-[10px] text-slate-400">Comma-separated regions where loans cannot be disbursed</span>
+        </div>
+
+        <!-- Modal Footer Buttons -->
+        <div class="pt-3 border-t border-slate-100 flex items-center justify-end space-x-2.5">
+          <button type="button" id="btn-cancel-modal" class="apple-btn-secondary">Cancel</button>
+          <button type="submit" class="apple-btn-primary">Save Guidelines</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
