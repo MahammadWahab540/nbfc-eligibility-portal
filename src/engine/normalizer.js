@@ -1,7 +1,18 @@
 /**
  * Applicant Data Normalizer & Attribute Extractor
- * Supports both:
- * 1. Direct Salesforce Production Field Schema (Flat SOQL query format):
+ * Supports multiple enterprise payload schemas:
+ * 1. "New Academy Co - Applicant NBFC Report" Schema:
+ *    - userId
+ *    - Academy PRE -Loan Journey Name
+ *    - Choose NBFC / NBFC Onboarding Name
+ *    - CIBIL Score Range
+ *    - Relation with the Co-Applicant
+ *    - Co applicant Occupation / Co-Applicant Occupation Other
+ *    - Co-Applicant Age
+ *    - State
+ *    - Co-Applicant Monthly Income / Co-Applicant Monthly Income Value
+ *    - Current Team
+ * 2. Flat Salesforce SOQL Schema:
  *    - Academy_Onboarding_PRE__r.userId__c
  *    - Id
  *    - Name
@@ -12,7 +23,7 @@
  *    - Co_Applicant_state_pre__c
  *    - Co_Applicant_age_pre__c
  *    - Co_Applicant_s_Bank_Name_PRE__c
- * 2. Nested Microservice Schema (co_applicant_details, cibil_details, etc.)
+ * 3. Nested Microservice Schema (co_applicant_details, cibil_details, etc.)
  */
 
 const { normalizeRelationship } = require('../config/relationship_map');
@@ -27,8 +38,15 @@ function normalizeApplicant(payload = {}, parameterQuestions = null) {
   const user = payload.user_details || {};
 
   // 1. Identifiers (Salesforce Id & User Id)
-  const salesforceId = payload.Id || payload.salesforce_id || user.salesforce_id || null;
+  const salesforceId =
+    payload.Id ||
+    payload.salesforce_id ||
+    user.salesforce_id ||
+    payload['NBFC Onboarding Name'] ||
+    null;
+
   const userApplicantId =
+    payload.userId ||
     payload['Academy_Onboarding_PRE__r.userId__c'] ||
     payload.Academy_Onboarding_PRE__r?.userId__c ||
     payload.userId__c ||
@@ -37,14 +55,25 @@ function normalizeApplicant(payload = {}, parameterQuestions = null) {
     payload.user_id ||
     'unspecified-user';
 
-  // 2. Name
-  const name = payload.Name || coApp.name || payload.name || 'Applicant';
+  // 2. Applicant Name
+  const name =
+    payload['Academy PRE -Loan Journey Name'] ||
+    payload.Name ||
+    coApp.name ||
+    payload.name ||
+    'Applicant';
 
-  // 3. CIBIL score extraction (Supports CIBIL_SCORE_RANGE_PRE__c)
+  // 3. CIBIL score extraction (Supports "CIBIL Score Range" & "CIBIL_SCORE_RANGE_PRE__c")
   let exactScore = null;
   let rangeString = null;
 
-  const rawRange = payload.CIBIL_SCORE_RANGE_PRE__c || cibil.cibil_score_range || payload.cibil_score_range || null;
+  const rawRange =
+    payload['CIBIL Score Range'] ||
+    payload.CIBIL_SCORE_RANGE_PRE__c ||
+    cibil.cibil_score_range ||
+    payload.cibil_score_range ||
+    null;
+
   if (rawRange && typeof rawRange === 'string') {
     rangeString = rawRange.trim();
   }
@@ -57,16 +86,20 @@ function normalizeApplicant(payload = {}, parameterQuestions = null) {
     if (!isNaN(parsed) && parsed > 0) exactScore = parsed;
   }
 
-  // 4. Monthly Income (Supports COAPPLICANT_MONTHLY_INCOME_PRE__c & COAPP_MONTHLY_INCOME_PRE__c)
+  // 4. Monthly Income
   let monthlyIncome = null;
   const rawIncome =
-    payload.COAPPLICANT_MONTHLY_INCOME_PRE__c !== undefined && payload.COAPPLICANT_MONTHLY_INCOME_PRE__c !== null && payload.COAPPLICANT_MONTHLY_INCOME_PRE__c !== ''
-      ? payload.COAPPLICANT_MONTHLY_INCOME_PRE__c
-      : (payload.COAPP_MONTHLY_INCOME_PRE__c !== undefined && payload.COAPP_MONTHLY_INCOME_PRE__c !== null && payload.COAPP_MONTHLY_INCOME_PRE__c !== ''
-          ? payload.COAPP_MONTHLY_INCOME_PRE__c
-          : (emp.monthly_income !== undefined && emp.monthly_income !== null && emp.monthly_income !== ''
-              ? emp.monthly_income
-              : null));
+    payload['Co-Applicant Monthly Income'] !== undefined && payload['Co-Applicant Monthly Income'] !== null && payload['Co-Applicant Monthly Income'] !== ''
+      ? payload['Co-Applicant Monthly Income']
+      : (payload['Co-Applicant Monthly Income Value'] !== undefined && payload['Co-Applicant Monthly Income Value'] !== null && payload['Co-Applicant Monthly Income Value'] !== ''
+          ? payload['Co-Applicant Monthly Income Value']
+          : (payload.COAPPLICANT_MONTHLY_INCOME_PRE__c !== undefined && payload.COAPPLICANT_MONTHLY_INCOME_PRE__c !== null && payload.COAPPLICANT_MONTHLY_INCOME_PRE__c !== ''
+              ? payload.COAPPLICANT_MONTHLY_INCOME_PRE__c
+              : (payload.COAPP_MONTHLY_INCOME_PRE__c !== undefined && payload.COAPP_MONTHLY_INCOME_PRE__c !== null && payload.COAPP_MONTHLY_INCOME_PRE__c !== ''
+                  ? payload.COAPP_MONTHLY_INCOME_PRE__c
+                  : (emp.monthly_income !== undefined && emp.monthly_income !== null && emp.monthly_income !== ''
+                      ? emp.monthly_income
+                      : null))));
 
   if (rawIncome !== null && rawIncome !== '') {
     const parsed = parseFloat(rawIncome);
@@ -75,14 +108,16 @@ function normalizeApplicant(payload = {}, parameterQuestions = null) {
     }
   }
 
-  // 5. Co-Applicant Age (Supports Co_Applicant_age_pre__c)
+  // 5. Co-Applicant Age
   let age = null;
   const rawAge =
-    payload.Co_Applicant_age_pre__c !== undefined && payload.Co_Applicant_age_pre__c !== null && payload.Co_Applicant_age_pre__c !== ''
-      ? payload.Co_Applicant_age_pre__c
-      : (coApp.age !== undefined && coApp.age !== null && coApp.age !== ''
-          ? coApp.age
-          : null);
+    payload['Co-Applicant Age'] !== undefined && payload['Co-Applicant Age'] !== null && payload['Co-Applicant Age'] !== ''
+      ? payload['Co-Applicant Age']
+      : (payload.Co_Applicant_age_pre__c !== undefined && payload.Co_Applicant_age_pre__c !== null && payload.Co_Applicant_age_pre__c !== ''
+          ? payload.Co_Applicant_age_pre__c
+          : (coApp.age !== undefined && coApp.age !== null && coApp.age !== ''
+              ? coApp.age
+              : null));
 
   if (rawAge !== null && rawAge !== '') {
     const parsed = parseInt(rawAge, 10);
@@ -91,16 +126,19 @@ function normalizeApplicant(payload = {}, parameterQuestions = null) {
     }
   }
 
-  // 6. Relationship (Supports RELATION_WITH_THE_COAPPLICANT_PRE__c)
+  // 6. Relationship
   const rawRelation =
+    payload['Relation with the Co-Applicant'] ||
     payload.RELATION_WITH_THE_COAPPLICANT_PRE__c ||
     coApp.relation ||
     payload.relation ||
     '';
   const normalizedRelation = normalizeRelationship(rawRelation);
 
-  // 7. Occupation (Supports Co_Applicant_Occupation_PRE__c)
+  // 7. Occupation
   const rawOcc =
+    payload['Co applicant Occupation'] ||
+    payload['Co-Applicant Occupation Other'] ||
     payload.Co_Applicant_Occupation_PRE__c ||
     emp.occupation ||
     payload.occupation ||
@@ -111,22 +149,25 @@ function normalizeApplicant(payload = {}, parameterQuestions = null) {
     is_unspecified: !rawOcc || rawOcc.trim() === ''
   };
 
-  // 8. Bank (Supports Co_Applicant_s_Bank_Name_PRE__c)
+  // 8. Bank (In this sheet, bank is unspecified or defaults to generic unless provided)
   const rawBank =
+    payload['Co-Applicant Bank Name'] ||
     payload.Co_Applicant_s_Bank_Name_PRE__c ||
     bank.bank_name ||
     payload.bank_name ||
     '';
   const classifiedBank = classifyBank(rawBank);
 
-  // 9. State & City Location (Supports Co_Applicant_state_pre__c)
+  // 9. State & City Location
   let state =
+    payload.State ||
     payload.Co_Applicant_state_pre__c ||
     coApp.state ||
     addr.state ||
     user.state ||
     '';
   let city =
+    payload.City ||
     payload.Co_Applicant_city_pre__c ||
     coApp.city ||
     addr.city ||
@@ -136,7 +177,7 @@ function normalizeApplicant(payload = {}, parameterQuestions = null) {
   const location = {
     state: state ? state.trim() : null,
     city: city ? city.trim() : null,
-    source: payload.Co_Applicant_state_pre__c ? 'SALESFORCE_COAPP_FIELD' : (coApp.state ? 'CO_APPLICANT' : 'ADDRESS_DETAILS')
+    source: payload.State ? 'REPORT_STATE' : (payload.Co_Applicant_state_pre__c ? 'SALESFORCE_COAPP_FIELD' : (coApp.state ? 'CO_APPLICANT' : 'ADDRESS_DETAILS'))
   };
 
   // 10. Parameter Questions
@@ -161,6 +202,9 @@ function normalizeApplicant(payload = {}, parameterQuestions = null) {
       : (addr.door_number || coApp.door_number ? true : undefined)
   };
 
+  // 11. Historical Ground Truth Chosen NBFC (for accuracy audit)
+  const chosenNbfc = payload['Choose NBFC'] || payload['NBFC Onboarding Name'] || null;
+
   return {
     userApplicantId,
     salesforceId,
@@ -177,7 +221,8 @@ function normalizeApplicant(payload = {}, parameterQuestions = null) {
     location,
     questions,
     tenure: payload.selected_emi_tenure || 36,
-    requestedLoanAmount: payload.requested_loan_amount || null
+    requestedLoanAmount: payload.requested_loan_amount || null,
+    chosenNbfc
   };
 }
 
