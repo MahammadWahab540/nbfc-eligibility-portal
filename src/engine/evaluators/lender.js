@@ -1,9 +1,10 @@
 /**
- * Evaluates an applicant against a single NBFC lender's criteria using 3-valued logic.
- * Aggregation rules:
- * - Any mandatory FAIL -> INELIGIBLE
- * - No FAIL, but >=1 mandatory UNKNOWN -> CONDITIONAL
- * - All mandatory checks PASS -> ELIGIBLE
+ * Evaluates an applicant against a single NBFC lender's criteria using 4-state logic.
+ * States:
+ * - ELIGIBLE: All required preliminary eligibility rules are satisfied.
+ * - CONDITIONAL: Potentially eligible, but additional information or verification is required.
+ * - INELIGIBLE: Confirmed failure of an applicable lender eligibility rule.
+ * - UNKNOWN: Insufficient or conflicting policy information to evaluate reliably.
  */
 
 const { evaluateCibil } = require('./cibil');
@@ -15,26 +16,32 @@ const { evaluateRegion } = require('./region');
 const { evaluateIdentity } = require('./identity');
 const { getDiscrepancies } = require('../../config/discrepancies');
 
-function evaluateLender(applicant, partnerConfig) {
+function evaluateLender(applicant, partnerConfig, policyMetadata = {}) {
   const c = partnerConfig.criteria || {};
   const partnerId = partnerConfig.id;
   const partnerName = partnerConfig.name;
   const priority = partnerConfig.priority || 99;
 
+  const rulesEvaluated = [];
   const matchedCriteria = [];
   const failures = [];
   const missingRequirements = [];
   const pendingVerifications = [];
 
-  // Check discrepancies
   const discrepancies = getDiscrepancies(partnerId);
 
   // 1. CIBIL Evaluation
   const cibilResult = evaluateCibil(applicant.cibil, c, partnerConfig.policy || {});
+  rulesEvaluated.push({
+    rule_name: 'CIBIL_SCORE',
+    status: cibilResult.status,
+    detail: cibilResult.detail || cibilResult.matched
+  });
   if (cibilResult.status === 'PASS') {
     matchedCriteria.push(cibilResult.matched || 'CIBIL criteria satisfied');
   } else if (cibilResult.status === 'FAIL') {
     failures.push({
+      rule: 'CIBIL_SCORE',
       reason_code: cibilResult.reason_code,
       detail: cibilResult.detail,
       required: cibilResult.required,
@@ -47,10 +54,16 @@ function evaluateLender(applicant, partnerConfig) {
 
   // 2. Monthly Income Evaluation
   const incomeResult = evaluateIncome(applicant.monthlyIncome, c);
+  rulesEvaluated.push({
+    rule_name: 'MONTHLY_INCOME',
+    status: incomeResult.status,
+    detail: incomeResult.detail || incomeResult.matched
+  });
   if (incomeResult.status === 'PASS') {
     matchedCriteria.push(incomeResult.matched);
   } else if (incomeResult.status === 'FAIL') {
     failures.push({
+      rule: 'MONTHLY_INCOME',
       reason_code: incomeResult.reason_code,
       detail: incomeResult.detail,
       required: incomeResult.required,
@@ -58,14 +71,21 @@ function evaluateLender(applicant, partnerConfig) {
     });
   } else {
     missingRequirements.push(incomeResult.missing_requirement);
+    if (incomeResult.detail) pendingVerifications.push(incomeResult.detail);
   }
 
   // 3. Age Evaluation
   const ageResult = evaluateAge(applicant.age, c);
+  rulesEvaluated.push({
+    rule_name: 'COAPPLICANT_AGE',
+    status: ageResult.status,
+    detail: ageResult.detail || ageResult.matched
+  });
   if (ageResult.status === 'PASS') {
     matchedCriteria.push(ageResult.matched);
   } else if (ageResult.status === 'FAIL') {
     failures.push({
+      rule: 'COAPPLICANT_AGE',
       reason_code: ageResult.reason_code,
       detail: ageResult.detail,
       required: ageResult.required,
@@ -73,14 +93,21 @@ function evaluateLender(applicant, partnerConfig) {
     });
   } else {
     missingRequirements.push(ageResult.missing_requirement);
+    if (ageResult.detail) pendingVerifications.push(ageResult.detail);
   }
 
   // 4. Relationship Evaluation
   const relResult = evaluateRelationship(applicant.relation, c);
+  rulesEvaluated.push({
+    rule_name: 'COAPPLICANT_RELATIONSHIP',
+    status: relResult.status,
+    detail: relResult.detail || relResult.matched
+  });
   if (relResult.status === 'PASS') {
     matchedCriteria.push(relResult.matched);
   } else if (relResult.status === 'FAIL') {
     failures.push({
+      rule: 'COAPPLICANT_RELATIONSHIP',
       reason_code: relResult.reason_code,
       detail: relResult.detail,
       canonical_relation: relResult.canonical,
@@ -88,14 +115,21 @@ function evaluateLender(applicant, partnerConfig) {
     });
   } else {
     missingRequirements.push(relResult.missing_requirement);
+    if (relResult.detail) pendingVerifications.push(relResult.detail);
   }
 
   // 5. Occupation Evaluation
   const occResult = evaluateOccupation(applicant.occupation, c);
+  rulesEvaluated.push({
+    rule_name: 'COAPPLICANT_OCCUPATION',
+    status: occResult.status,
+    detail: occResult.detail || occResult.matched
+  });
   if (occResult.status === 'PASS') {
     matchedCriteria.push(occResult.matched);
   } else if (occResult.status === 'FAIL') {
     failures.push({
+      rule: 'COAPPLICANT_OCCUPATION',
       reason_code: occResult.reason_code,
       detail: occResult.detail,
       occupation: occResult.occupation
@@ -106,10 +140,16 @@ function evaluateLender(applicant, partnerConfig) {
 
   // 6. Bank Policy Evaluation
   const bankResult = evaluateBank(applicant.bank, c);
+  rulesEvaluated.push({
+    rule_name: 'BANK_ACCOUNT_TYPE',
+    status: bankResult.status,
+    detail: bankResult.detail || bankResult.matched
+  });
   if (bankResult.status === 'PASS') {
     matchedCriteria.push(bankResult.matched);
   } else if (bankResult.status === 'FAIL') {
     failures.push({
+      rule: 'BANK_ACCOUNT_TYPE',
       reason_code: bankResult.reason_code,
       detail: bankResult.detail,
       bank_name: bankResult.bank_name,
@@ -121,10 +161,16 @@ function evaluateLender(applicant, partnerConfig) {
 
   // 7. Regional Evaluation
   const regionResult = evaluateRegion(applicant.location, c);
+  rulesEvaluated.push({
+    rule_name: 'GEOGRAPHIC_REGION',
+    status: regionResult.status,
+    detail: regionResult.detail || regionResult.matched
+  });
   if (regionResult.status === 'PASS') {
     matchedCriteria.push(regionResult.matched);
   } else if (regionResult.status === 'FAIL') {
     failures.push({
+      rule: 'GEOGRAPHIC_REGION',
       reason_code: regionResult.reason_code,
       detail: regionResult.detail,
       restricted_state: regionResult.restricted_state
@@ -135,6 +181,11 @@ function evaluateLender(applicant, partnerConfig) {
 
   // 8. Identity & Parameter Questions Evaluation
   const identityResult = evaluateIdentity(applicant.questions, c);
+  rulesEvaluated.push({
+    rule_name: 'IDENTITY_AND_DOCUMENT_VERIFICATION',
+    status: identityResult.failures.length > 0 ? 'FAIL' : (identityResult.unknownRequirements.length > 0 ? 'UNKNOWN' : 'PASS'),
+    detail: identityResult.failures.length > 0 ? identityResult.failures[0].detail : 'Identity checks satisfied'
+  });
   identityResult.matched.forEach(m => matchedCriteria.push(m));
   identityResult.failures.forEach(f => failures.push(f));
   identityResult.unknownRequirements.forEach(u => {
@@ -143,17 +194,20 @@ function evaluateLender(applicant, partnerConfig) {
 
   // Decision Aggregation
   let classification = 'ELIGIBLE';
-  let primaryReasonCode = null;
-  let primaryReasonDetail = null;
+  let primaryReasonCode = 'CRITERIA_SATISFIED';
+  let primaryReasonDetail = 'All mandatory underwriting criteria satisfied.';
+  let recommendedNextAction = 'Proceed with loan application and document submission.';
 
   if (failures.length > 0) {
     classification = 'INELIGIBLE';
     primaryReasonCode = failures[0].reason_code;
     primaryReasonDetail = failures[0].detail;
+    recommendedNextAction = `Applicant disqualified for ${partnerName}: ${failures[0].detail}. Route to alternative partner.`;
   } else if (missingRequirements.length > 0) {
     classification = 'CONDITIONAL';
     primaryReasonCode = 'ADDITIONAL_DOCUMENTS_REQUIRED';
     primaryReasonDetail = `Lender requirements pending: ${missingRequirements.slice(0, 2).join('; ')}`;
+    recommendedNextAction = `Collect pending documents: ${missingRequirements.slice(0, 2).join('; ')} to finalize eligibility.`;
   }
 
   return {
@@ -162,12 +216,29 @@ function evaluateLender(applicant, partnerConfig) {
     partner_name: partnerName,
     priority: priority,
     classification: classification,
-    primary_reason_code: primaryReasonCode,
-    primary_reason_detail: primaryReasonDetail,
+    decision_status: classification,
+    reason_code: primaryReasonCode,
+    reason_detail: primaryReasonDetail,
+    explanation: primaryReasonDetail,
+    rules_evaluated: rulesEvaluated,
+    input_values: {
+      cibil: applicant.cibil,
+      monthly_income: applicant.monthlyIncome,
+      age: applicant.age,
+      relationship: applicant.relation ? applicant.relation.canonical : null,
+      occupation: applicant.occupation ? applicant.occupation.raw : null,
+      bank_name: applicant.bank ? applicant.bank.name : null,
+      state: applicant.location ? applicant.location.state : null
+    },
+    missing_requirements: missingRequirements,
+    hard_blockers: failures.map(f => f.detail || f.reason_code),
+    pending_verifications: pendingVerifications,
     matched_criteria: matchedCriteria,
     failures: failures,
-    missing_requirements: missingRequirements,
-    pending_verifications: pendingVerifications,
+    policy_version: policyMetadata.policy_version || '2.1.0',
+    effective_date: policyMetadata.effective_date || '2026-11-02',
+    algorithm_version: '2.1.0',
+    recommended_next_action: recommendedNextAction,
     discrepancies: discrepancies.length > 0 ? discrepancies : undefined
   };
 }

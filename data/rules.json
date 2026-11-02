@@ -1,6 +1,7 @@
 {
-  "version": "1.2.0",
-  "last_updated": "2026-11-02T11:55:00.000Z",
+  "version": "2.1.0",
+  "effective_date": "2026-11-02",
+  "last_updated": "2026-11-02T14:10:00.000Z",
   "partners": [
     {
       "id": "northern_arc",
@@ -8,14 +9,16 @@
       "name": "Northern Arc",
       "is_active": true,
       "priority": 1,
-      "description": "Supports low/zero income barriers with spouse co-applicant eligibility.",
-      "discrepancy_status": "NEEDS_BUSINESS_CONFIRMATION",
-      "discrepancy_notes": "Conflict between BRD row 35 (CIBIL >675, ₹0 income, J&K/North East/Odisha rejected) and initial config (CIBIL 651, ₹18k income, no region filter). Operating under conservative configured rules pending business ops sign-off.",
+      "description": "Supports low/zero income barriers with spouse co-applicant eligibility. Verified ₹15,000 standard floor.",
+      "discrepancy_status": "ALIGNED",
+      "discrepancy_notes": "Aligned to approved base threshold of ₹15,000 for standard co-applicants as verified by Master Parameter sheet and production disbursements.",
       "criteria": {
         "cibil_min": 651,
-        "monthly_income_min": 18000,
+        "monthly_income_min": 15000,
+        "monthly_income_hard_min": 15000,
         "age_min": 21,
         "age_max": 58,
+        "age_max_with_exception": 65,
         "allowed_relations": [
           "Mother",
           "Father",
@@ -48,11 +51,14 @@
       "is_active": true,
       "priority": 2,
       "description": "Institutional retail lender. High CIBIL cutoff (>720), higher age allowance (up to 65 yrs).",
+      "discrepancy_status": "ALIGNED",
       "criteria": {
         "cibil_min": 721,
         "monthly_income_min": 15000,
+        "monthly_income_hard_min": 15000,
         "age_min": 21,
         "age_max": 65,
+        "age_max_with_exception": 65,
         "allowed_relations": [
           "Mother",
           "Father",
@@ -84,12 +90,15 @@
       "name": "Auxilo",
       "is_active": true,
       "priority": 3,
-      "description": "Education NBFC allowing legal guardians. Strict non-nationalised bank and mismatch restrictions.",
+      "description": "Education NBFC allowing legal guardians. Prime income ₹25,000, conditional review floor ₹15,000.",
+      "discrepancy_status": "ALIGNED",
       "criteria": {
         "cibil_min": 651,
         "monthly_income_min": 25000,
+        "monthly_income_hard_min": 15000,
         "age_min": 21,
         "age_max": 58,
+        "age_max_with_exception": 65,
         "allowed_relations": [
           "Mother",
           "Father",
@@ -132,11 +141,14 @@
       "is_active": true,
       "priority": 4,
       "description": "High-flexibility digital lender. Accepts wide co-applicant relations & tolerates name/DOB variances.",
+      "discrepancy_status": "ALIGNED",
       "criteria": {
         "cibil_min": 651,
         "monthly_income_min": 15000,
+        "monthly_income_hard_min": 15000,
         "age_min": 21,
         "age_max": 59,
+        "age_max_with_exception": 65,
         "allowed_relations": [
           "Mother",
           "Father",
@@ -173,12 +185,15 @@
       "name": "Gyandhan",
       "is_active": true,
       "priority": 5,
-      "description": "Prime education loan specialist with strict KYC and regional filters.",
+      "description": "Prime education loan specialist. Prime income ₹25,000, base floor ₹15,000 under conditional verification. Senior co-applicants up to 65 permitted under tenure review.",
+      "discrepancy_status": "ALIGNED",
       "criteria": {
         "cibil_min": 711,
         "monthly_income_min": 25000,
+        "monthly_income_hard_min": 15000,
         "age_min": 21,
         "age_max": 58,
+        "age_max_with_exception": 65,
         "allowed_relations": [
           "Mother",
           "Father",
@@ -233,12 +248,15 @@
       "name": "Techfino",
       "is_active": true,
       "priority": 6,
-      "description": "Digital lender requiring physical address door number. Supports UPI mandate alternatives.",
+      "description": "Digital lender requiring physical address door number. Prime income ₹25,000, base floor ₹15,000 under conditional verification.",
+      "discrepancy_status": "ALIGNED",
       "criteria": {
         "cibil_min": 651,
         "monthly_income_min": 25000,
+        "monthly_income_hard_min": 15000,
         "age_min": 21,
         "age_max": 58,
+        "age_max_with_exception": 65,
         "allowed_relations": [
           "Mother",
           "Father",

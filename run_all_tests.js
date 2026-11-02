@@ -10,6 +10,7 @@ const testSuites = [
   'test/boundary/thresholds.test.js',
   'test/synthetic/edge_cases_100.test.js',
   'test/integration/salesforce_sync.test.js',
+  'test/regression/contradictions_audit.test.js',
   'test-scenarios.js',
   'test/replay/historical_replay.js'
 ];

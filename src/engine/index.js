@@ -1,6 +1,6 @@
 /**
  * Centralised NBFC Eligibility & Recommendation Engine
- * Production-Hardened Core Architecture
+ * Production-Hardened Core Architecture v2.1.0
  */
 
 const fs = require('fs');
@@ -26,7 +26,7 @@ class NBFCEligibilityEngine {
       const rawRules = fs.readFileSync(this.rulesPath, 'utf8');
       this.ruleSet = JSON.parse(rawRules);
     } catch (e) {
-      this.ruleSet = { version: '1.2.0', partners: [] };
+      this.ruleSet = { version: '2.1.0', effective_date: '2026-11-02', partners: [] };
     }
 
     try {
@@ -45,7 +45,7 @@ class NBFCEligibilityEngine {
   }
 
   recordAudit(user, action, entity, details) {
-    return this.db.recordAudit(user, action, entity, details, this.ruleSet.version || '1.2.0');
+    return this.db.recordAudit(user, action, entity, details, this.ruleSet.version || '2.1.0');
   }
 
   /**
@@ -72,52 +72,52 @@ class NBFCEligibilityEngine {
     const eligibleRaw = [];
     const conditionalRaw = [];
     const ineligibleRaw = [];
+    const unknownRaw = [];
     const allMissingInformation = new Set();
 
     const activePartners = (this.ruleSet.partners || []).filter(p => p.is_active !== false);
 
     for (const partner of activePartners) {
-      const result = evaluateLender(applicant, partner);
+      const result = evaluateLender(applicant, partner, {
+        policy_version: this.ruleSet.version || '2.1.0',
+        effective_date: this.ruleSet.effective_date || '2026-11-02'
+      });
 
       result.missing_requirements.forEach(req => allMissingInformation.add(req));
 
+      const lenderDecisionPayload = {
+        nbfc_code: result.nbfc_code,
+        partner_id: result.partner_id,
+        partner_name: result.partner_name,
+        priority: result.priority,
+        decision_status: result.decision_status,
+        eligibility_status: result.decision_status,
+        reason_code: result.reason_code,
+        reason_detail: result.reason_detail,
+        explanation: result.explanation,
+        rules_evaluated: result.rules_evaluated,
+        input_values: result.input_values,
+        missing_requirements: result.missing_requirements,
+        hard_blockers: result.hard_blockers,
+        pending_verifications: result.pending_verifications,
+        matched_criteria: result.matched_criteria,
+        failures: result.failures.map(f => f.detail || f.reason_code),
+        all_failures: result.failures,
+        policy_version: result.policy_version,
+        effective_date: result.effective_date,
+        algorithm_version: result.algorithm_version,
+        recommended_next_action: result.recommended_next_action,
+        discrepancies: result.discrepancies
+      };
+
       if (result.classification === 'ELIGIBLE') {
-        eligibleRaw.push({
-          nbfc_code: result.nbfc_code,
-          partner_id: result.partner_id,
-          partner_name: result.partner_name,
-          priority: result.priority,
-          eligibility_status: 'PRELIMINARILY_ELIGIBLE',
-          matched_criteria: result.matched_criteria,
-          discrepancies: result.discrepancies
-        });
+        eligibleRaw.push(lenderDecisionPayload);
       } else if (result.classification === 'CONDITIONAL') {
-        conditionalRaw.push({
-          nbfc_code: result.nbfc_code,
-          partner_id: result.partner_id,
-          partner_name: result.partner_name,
-          priority: result.priority,
-          eligibility_status: 'CONDITIONAL',
-          reason_code: result.primary_reason_code,
-          reason_detail: result.primary_reason_detail,
-          missing_requirements: result.missing_requirements,
-          pending_verifications: result.pending_verifications,
-          matched_criteria: result.matched_criteria,
-          discrepancies: result.discrepancies
-        });
+        conditionalRaw.push(lenderDecisionPayload);
+      } else if (result.classification === 'UNKNOWN') {
+        unknownRaw.push(lenderDecisionPayload);
       } else {
-        ineligibleRaw.push({
-          nbfc_code: result.nbfc_code,
-          partner_id: result.partner_id,
-          partner_name: result.partner_name,
-          priority: result.priority,
-          eligibility_status: 'NOT_ELIGIBLE',
-          reason_code: result.primary_reason_code,
-          reason_detail: result.primary_reason_detail,
-          failures: result.failures.map(f => f.detail || f.reason_code),
-          all_failures: result.failures,
-          discrepancies: result.discrepancies
-        });
+        ineligibleRaw.push(lenderDecisionPayload);
       }
     }
 
@@ -133,6 +133,8 @@ class NBFCEligibilityEngine {
       overallDecision = 'APPROVED';
     } else if (conditionalNbfcs.length > 0) {
       overallDecision = 'CONDITIONAL_APPROVAL';
+    } else if (unknownRaw.length > 0) {
+      overallDecision = 'PENDING_POLICY_CLARIFICATION';
     }
 
     // Construct recommendation object
@@ -158,7 +160,9 @@ class NBFCEligibilityEngine {
     const responsePayload = {
       success: true,
       evaluation_id: evaluationId,
-      rules_version: this.ruleSet.version || '1.2.0',
+      rules_version: this.ruleSet.version || '2.1.0',
+      effective_date: this.ruleSet.effective_date || '2026-11-02',
+      algorithm_version: '2.1.0',
       timestamp: new Date().toISOString(),
       user_applicant_id: applicant.userApplicantId,
       salesforce_id: applicant.salesforceId,
@@ -170,27 +174,30 @@ class NBFCEligibilityEngine {
         cibil: applicant.cibil,
         monthly_income: applicant.monthlyIncome,
         age: applicant.age,
-        relation: applicant.relation.canonical,
-        bank: applicant.bank.name,
-        bank_category: applicant.bank.category,
+        relation: applicant.relation ? applicant.relation.canonical : null,
+        bank: applicant.bank ? applicant.bank.name : null,
+        bank_category: applicant.bank ? applicant.bank.category : null,
         location: applicant.location
       },
       recommendation: recommendation,
       eligible_nbfcs: eligibleNbfcs,
       conditional_nbfcs: conditionalNbfcs,
       ineligible_nbfcs: ineligibleRaw,
+      unknown_nbfcs: unknownRaw,
       missing_information: Array.from(allMissingInformation),
       overall_summary: {
         total_lenders_evaluated: activePartners.length,
-        preliminarily_eligible_count: eligibleNbfcs.length,
+        eligible_count: eligibleNbfcs.length,
         conditional_count: conditionalNbfcs.length,
-        ineligible_count: ineligibleRaw.length
+        ineligible_count: ineligibleRaw.length,
+        unknown_count: unknownRaw.length
       },
       summary: {
         total_lenders_evaluated: activePartners.length,
         eligible_count: eligibleNbfcs.length,
         conditional_count: conditionalNbfcs.length,
-        ineligible_count: ineligibleRaw.length
+        ineligible_count: ineligibleRaw.length,
+        unknown_count: unknownRaw.length
       }
     };
 
@@ -207,10 +214,10 @@ class NBFCEligibilityEngine {
         inputs: {
           monthly_income: applicant.monthlyIncome,
           age: applicant.age,
-          relation: applicant.relation.canonical,
+          relation: applicant.relation ? applicant.relation.canonical : null,
           cibil: applicant.cibil,
-          bank: applicant.bank.name,
-          state: applicant.location.state
+          bank: applicant.bank ? applicant.bank.name : null,
+          state: applicant.location ? applicant.location.state : null
         },
         eligible_count: eligibleNbfcs.length,
         conditional_count: conditionalNbfcs.length,

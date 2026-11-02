@@ -25,9 +25,10 @@ assert.strictEqual(r2.canonical, 'Brother');
 const r3 = evaluateRelationship(normalizeRelationship('Sister (Employed)'), gyandhanCriteria);
 assert.strictEqual(r3.status, 'PASS', 'Sister (Employed) must pass Gyandhan as Sibling/Blood relation');
 
-// Test 4: Other -> FAIL for Gyandhan (does not allow Any relative)
+// Test 4: Other -> UNKNOWN for Gyandhan (unmapped relationship requires clarification, NOT automatic hard rejection)
 const r4 = evaluateRelationship(normalizeRelationship('Other'), gyandhanCriteria);
-assert.strictEqual(r4.status, 'FAIL', 'Other must FAIL for Gyandhan');
+assert.strictEqual(r4.status, 'UNKNOWN', 'Other must return UNKNOWN (requires clarification) for Gyandhan');
+assert.strictEqual(r4.reason_code, 'RELATIONSHIP_CLARIFICATION_REQUIRED');
 
 // Test 5: Other -> PASS for Fibe (explicitly allows "Any relative")
 const r5 = evaluateRelationship(normalizeRelationship('Other'), fibeCriteria);
@@ -47,4 +48,8 @@ assert.strictEqual(r7.status, 'FAIL', 'Spouse must fail Gyandhan');
 const r8 = evaluateRelationship(normalizeRelationship(null), gyandhanCriteria);
 assert.strictEqual(r8.status, 'UNKNOWN', 'Missing relation must return UNKNOWN');
 
-console.log('✓ All 7 Relationship unit tests passed successfully.');
+// Test 8: Explicitly confirmed prohibited relationship (e.g. Friend/Unrelated) -> FAIL
+const r9 = evaluateRelationship(normalizeRelationship('Friend'), gyandhanCriteria);
+assert.strictEqual(r9.status, 'FAIL', 'Unrelated Friend must FAIL for Gyandhan');
+
+console.log('✓ All 8 Relationship unit tests passed successfully.');
