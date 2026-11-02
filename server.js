@@ -248,7 +248,7 @@ const server = http.createServer(async (req, res) => {
     // -------------------------------------------------------------
     // API: EVALUATE KYC PAYLOAD
     // -------------------------------------------------------------
-    if (req.method === 'POST' && pathname === '/api/v1/eligibility/evaluate') {
+    if (req.method === 'POST' && (pathname === '/api/v1/eligibility/evaluate' || pathname === '/api/evaluate')) {
       const body = await parseBody(req);
       const parameterQuestions = body.parameter_questions || null;
       const idempotencyKey = req.headers['x-idempotency-key'] || body.idempotency_key || null;
