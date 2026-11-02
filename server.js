@@ -9,10 +9,12 @@ const path = require('path');
 const NBFCEligibilityEngine = require('./src/engine/index');
 const { getDatabaseRepository } = require('./src/db/database');
 const SalesforceSyncService = require('./src/services/salesforce_sync');
+const { getPayloadManagerService } = require('./src/services/payload_manager');
 
 const db = getDatabaseRepository();
 const engine = new NBFCEligibilityEngine({ dataPath: path.join(__dirname, 'data'), db });
 const sfSyncService = new SalesforceSyncService({ db });
+const payloadManager = getPayloadManagerService({ db, dataPath: path.join(__dirname, 'data') });
 
 const PORT = process.env.PORT || 3000;
 const ADMIN_API_KEY = process.env.ADMIN_API_KEY || null;
@@ -330,6 +332,140 @@ const server = http.createServer(async (req, res) => {
         selected_nbfc_id: selectedId,
         salesforce_sync: syncResult
       });
+    }
+
+    // -------------------------------------------------------------
+    // API: BUSINESS-CONFIGURABLE PAYLOAD MANAGEMENT SYSTEM
+    // -------------------------------------------------------------
+    // Meta: Teams, Programs, Field Types, Priorities
+    if (req.method === 'GET' && pathname === '/api/v1/payload-configs/meta') {
+      return sendJSON(res, 200, payloadManager.getTeamsAndPrograms());
+    }
+
+    // Fetch Team x Program Configuration (Active or Draft)
+    if (req.method === 'GET' && pathname.match(/^\/api\/v1\/payload-configs\/([^/]+)\/([^/]+)$/)) {
+      const parts = pathname.split('/');
+      const teamId = parts[4];
+      const programId = parts[5];
+      const isDraftMode = url.searchParams.get('mode') === 'draft';
+
+      try {
+        const config = isDraftMode
+          ? payloadManager.getDraftConfiguration(teamId, programId)
+          : payloadManager.getResolvedConfiguration(teamId, programId);
+        return sendJSON(res, 200, config);
+      } catch (err) {
+        return sendJSON(res, 404, { error: err.message });
+      }
+    }
+
+    // Save Draft Fields for Team x Program
+    if (req.method === 'PUT' && pathname.match(/^\/api\/v1\/payload-configs\/([^/]+)\/([^/]+)\/draft$/)) {
+      const parts = pathname.split('/');
+      const teamId = parts[4];
+      const programId = parts[5];
+      const body = await parseBody(req);
+
+      try {
+        const result = payloadManager.saveDraft(
+          teamId,
+          programId,
+          body.fields || [],
+          body.user || 'Business User',
+          body.summary || 'Updated draft fields'
+        );
+        return sendJSON(res, 200, result);
+      } catch (err) {
+        return sendJSON(res, 400, { error: err.message });
+      }
+    }
+
+    // Publish Draft to Live Version
+    if (req.method === 'POST' && pathname.match(/^\/api\/v1\/payload-configs\/([^/]+)\/([^/]+)\/publish$/)) {
+      const parts = pathname.split('/');
+      const teamId = parts[4];
+      const programId = parts[5];
+      const body = await parseBody(req);
+
+      try {
+        const result = payloadManager.publishConfiguration(
+          teamId,
+          programId,
+          body.user || 'Business Administrator',
+          body.change_summary || 'Published updated payload criteria'
+        );
+        return sendJSON(res, 200, result);
+      } catch (err) {
+        return sendJSON(res, 400, { error: err.message });
+      }
+    }
+
+    // Validate a Sample or Real Payload against Schema
+    if (req.method === 'POST' && pathname.match(/^\/api\/v1\/payload-configs\/([^/]+)\/([^/]+)\/validate$/)) {
+      const parts = pathname.split('/');
+      const teamId = parts[4];
+      const programId = parts[5];
+      const body = await parseBody(req);
+      const useDraft = url.searchParams.get('mode') === 'draft';
+
+      try {
+        const validation = payloadManager.validatePayload(teamId, programId, body.payload || body, { useDraft });
+        return sendJSON(res, 200, validation);
+      } catch (err) {
+        return sendJSON(res, 400, { error: err.message });
+      }
+    }
+
+    // Generate Mock Sample Payload
+    if (req.method === 'GET' && pathname.match(/^\/api\/v1\/payload-configs\/([^/]+)\/([^/]+)\/sample$/)) {
+      const parts = pathname.split('/');
+      const teamId = parts[4];
+      const programId = parts[5];
+
+      try {
+        const sample = payloadManager.generateSamplePayload(teamId, programId);
+        return sendJSON(res, 200, sample);
+      } catch (err) {
+        return sendJSON(res, 400, { error: err.message });
+      }
+    }
+
+    // Version History
+    if (req.method === 'GET' && pathname.match(/^\/api\/v1\/payload-configs\/([^/]+)\/([^/]+)\/history$/)) {
+      const parts = pathname.split('/');
+      const teamId = parts[4];
+      const programId = parts[5];
+
+      try {
+        const history = payloadManager.getVersionHistory(teamId, programId);
+        return sendJSON(res, 200, history);
+      } catch (err) {
+        return sendJSON(res, 404, { error: err.message });
+      }
+    }
+
+    // Rollback to Historical Version
+    if (req.method === 'POST' && pathname.match(/^\/api\/v1\/payload-configs\/([^/]+)\/([^/]+)\/rollback$/)) {
+      const parts = pathname.split('/');
+      const teamId = parts[4];
+      const programId = parts[5];
+      const body = await parseBody(req);
+
+      if (!body.target_version) {
+        return sendJSON(res, 400, { error: 'target_version is required for rollback.' });
+      }
+
+      try {
+        const result = payloadManager.rollbackVersion(
+          teamId,
+          programId,
+          body.target_version,
+          body.user || 'Administrator'
+        );
+        return sendJSON(res, 200, result);
+      } catch (err) {
+        return sendJSON(res, 400, { error: err.message });
+      }
     }
 
     // Fallback 404

@@ -457,6 +457,61 @@ input:checked + .apple-switch-slider:before {
 }
 
 /* =========================================================================
+   PAYLOAD MANAGEMENT SYSTEM COMPONENT STYLING
+   ========================================================================= */
+.active-segment {
+  background: var(--apple-blue) !important;
+  border-color: var(--apple-blue) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.28);
+}
+
+.active-segment div,
+.active-segment span {
+  color: #ffffff !important;
+}
+
+.payload-field-card {
+  transition: all var(--duration-fast) var(--ease-spring);
+  border: 1px solid rgba(0, 0, 0, 0.07);
+}
+
+.payload-field-card:hover {
+  border-color: rgba(0, 113, 227, 0.35);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  transform: translateY(-1px);
+}
+
+.payload-field-card.disabled-field {
+  opacity: 0.6;
+  background-color: #fafafc;
+}
+
+.chip-priority-critical {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.chip-priority-high {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.chip-priority-medium {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.chip-priority-low {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+/* =========================================================================
    ACCESSIBILITY: RESPECT USER REDUCED MOTION SETTINGS
    ========================================================================= */
 @media (prefers-reduced-motion: reduce) {

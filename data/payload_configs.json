@@ -1,0 +1,500 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2026-11-02T12:43:56.450Z",
+  "teams": {
+    "onboarding": {
+      "id": "onboarding",
+      "name": "Onboarding Team",
+      "base_fields": [
+        {
+          "id": "f_user_id",
+          "key": "userId",
+          "label": "User Applicant ID",
+          "type": "text",
+          "required": true,
+          "enabled": true,
+          "priority": "Critical",
+          "default_value": "",
+          "placeholder": "e.g. 8e40531c-075f-43ec-98ec-4a0457a24ccd",
+          "help_text": "Salesforce Lead / Student unique UUID"
+        },
+        {
+          "id": "f_name",
+          "key": "Academy PRE -Loan Journey Name",
+          "label": "Applicant Name",
+          "type": "text",
+          "required": true,
+          "enabled": true,
+          "priority": "Critical",
+          "default_value": "",
+          "placeholder": "Full legal name as per Aadhaar"
+        },
+        {
+          "id": "f_cibil",
+          "key": "CIBIL Score Range",
+          "label": "CIBIL Score Bracket",
+          "type": "dropdown",
+          "required": true,
+          "enabled": true,
+          "priority": "Critical",
+          "options": [
+            "700 - 900",
+            "650 - 699",
+            "300 - 649",
+            "No CIBIL Score"
+          ],
+          "default_value": "700 - 900",
+          "help_text": "Self-reported or preliminary bureau bracket"
+        },
+        {
+          "id": "f_relation",
+          "key": "Relation with the Co-Applicant",
+          "label": "Co-Applicant Relationship",
+          "type": "dropdown",
+          "required": true,
+          "enabled": true,
+          "priority": "High",
+          "options": [
+            "Father",
+            "Mother",
+            "Spouse",
+            "Brother",
+            "Sister",
+            "Sibling",
+            "Legal Guardian",
+            "Other"
+          ],
+          "default_value": "Father"
+        },
+        {
+          "id": "f_income",
+          "key": "Co-Applicant Monthly Income",
+          "label": "Co-Applicant Monthly Income",
+          "type": "currency",
+          "required": true,
+          "enabled": true,
+          "priority": "Critical",
+          "default_value": 30000,
+          "validation": {
+            "min": 15000,
+            "max": 1000000
+          }
+        },
+        {
+          "id": "f_age",
+          "key": "Co-Applicant Age",
+          "label": "Co-Applicant Age",
+          "type": "number",
+          "required": true,
+          "enabled": true,
+          "priority": "High",
+          "default_value": 45,
+          "validation": {
+            "min": 18,
+            "max": 70
+          }
+        },
+        {
+          "id": "f_bank",
+          "key": "Co-Applicant's Bank Name",
+          "label": "Salary / Primary Bank Name",
+          "type": "text",
+          "required": true,
+          "enabled": true,
+          "priority": "High",
+          "default_value": "HDFC",
+          "placeholder": "Bank IFSC / Code / Name"
+        },
+        {
+          "id": "f_state",
+          "key": "State",
+          "label": "Resident State",
+          "type": "text",
+          "required": true,
+          "enabled": true,
+          "priority": "Medium",
+          "default_value": "Karnataka"
+        },
+        {
+          "id": "f_pan_aadhaar",
+          "key": "is_pan_aadhaar_linked",
+          "label": "PAN-Aadhaar Linked",
+          "type": "boolean",
+          "required": false,
+          "enabled": true,
+          "priority": "Medium",
+          "default_value": true
+        }
+      ],
+      "programs": {
+        "genies": {
+          "version": "1.0.0",
+          "status": "ACTIVE",
+          "published_at": "2026-11-02T12:43:56.451Z",
+          "published_by": "System Administrator",
+          "change_summary": "Standard onboarding schema for Genies cohort",
+          "overrides": {
+            "Co-Applicant Monthly Income": {
+              "required": true,
+              "default_value": 20000,
+              "validation": {
+                "min": 15000,
+                "max": 500000
+              }
+            }
+          },
+          "program_fields": [
+            {
+              "id": "f_genies_device",
+              "key": "has_laptop_and_wifi",
+              "label": "Has Personal Laptop & Internet",
+              "type": "boolean",
+              "required": true,
+              "enabled": true,
+              "priority": "High",
+              "default_value": true,
+              "help_text": "Prerequisite for remote learning in Genies"
+            }
+          ]
+        },
+        "smart": {
+          "version": "1.0.0",
+          "status": "ACTIVE",
+          "published_at": "2026-11-02T12:43:56.451Z",
+          "published_by": "System Administrator",
+          "change_summary": "Standard Tier-1 onboarding schema for Smart Academy",
+          "overrides": {
+            "Co-Applicant Monthly Income": {
+              "required": true,
+              "default_value": 25000,
+              "validation": {
+                "min": 20000,
+                "max": 800000
+              }
+            }
+          },
+          "program_fields": [
+            {
+              "id": "f_smart_degree",
+              "key": "highest_education_qualification",
+              "label": "Highest Degree Qualification",
+              "type": "dropdown",
+              "required": true,
+              "enabled": true,
+              "priority": "Medium",
+              "options": [
+                "B.Tech / B.E",
+                "BCA / MCA",
+                "B.Sc / M.Sc",
+                "Diploma",
+                "Other Graduate"
+              ],
+              "default_value": "B.Tech / B.E"
+            }
+          ]
+        },
+        "edge": {
+          "version": "1.0.0",
+          "status": "ACTIVE",
+          "published_at": "2026-11-02T12:43:56.451Z",
+          "published_by": "System Administrator",
+          "change_summary": "High-bar placement track schema for Edge",
+          "overrides": {
+            "Co-Applicant Monthly Income": {
+              "required": true,
+              "default_value": 35000,
+              "priority": "Critical",
+              "validation": {
+                "min": 25000,
+                "max": 1000000
+              }
+            },
+            "is_pan_aadhaar_linked": {
+              "required": true,
+              "priority": "High"
+            }
+          },
+          "program_fields": [
+            {
+              "id": "f_edge_placement_agreement",
+              "key": "placement_agreement_acknowledged",
+              "label": "Placement Guarantee Agreement Signed",
+              "type": "boolean",
+              "required": true,
+              "enabled": true,
+              "priority": "Critical",
+              "default_value": true
+            },
+            {
+              "id": "f_edge_coding_score",
+              "key": "entrance_coding_assessment_score",
+              "label": "Entrance Coding Assessment Score",
+              "type": "number",
+              "required": true,
+              "enabled": true,
+              "priority": "High",
+              "default_value": 80,
+              "validation": {
+                "min": 60,
+                "max": 100
+              }
+            }
+          ]
+        }
+      }
+    },
+    "retargeting": {
+      "id": "retargeting",
+      "name": "Retargeting Team",
+      "base_fields": [
+        {
+          "id": "f_retarget_lead_id",
+          "key": "lead_id",
+          "label": "Salesforce Lead ID",
+          "type": "text",
+          "required": true,
+          "enabled": true,
+          "priority": "Critical"
+        },
+        {
+          "id": "f_retarget_applicant_name",
+          "key": "applicant_name",
+          "label": "Applicant Full Name",
+          "type": "text",
+          "required": true,
+          "enabled": true,
+          "priority": "High"
+        },
+        {
+          "id": "f_retarget_drop_stage",
+          "key": "drop_off_stage",
+          "label": "Previous Drop-Off Stage",
+          "type": "dropdown",
+          "required": true,
+          "enabled": true,
+          "priority": "Critical",
+          "options": [
+            "KYC Pending",
+            "Bank Statement Review",
+            "VKYC Incomplete",
+            "Lender Rejected",
+            "Financial Hardship"
+          ],
+          "default_value": "Bank Statement Review"
+        },
+        {
+          "id": "f_retarget_discount_code",
+          "key": "re_engagement_scholarship_coupon",
+          "label": "Scholarship / Discount Code",
+          "type": "text",
+          "required": false,
+          "enabled": true,
+          "priority": "Medium",
+          "default_value": "RESTART20"
+        },
+        {
+          "id": "f_retarget_callback_time",
+          "key": "preferred_callback_slot",
+          "label": "Preferred Counselor Callback Slot",
+          "type": "dropdown",
+          "required": true,
+          "enabled": true,
+          "priority": "High",
+          "options": [
+            "Morning (10 AM - 1 PM)",
+            "Afternoon (1 PM - 4 PM)",
+            "Evening (4 PM - 8 PM)",
+            "Weekend"
+          ],
+          "default_value": "Evening (4 PM - 8 PM)"
+        }
+      ],
+      "programs": {
+        "genies": {
+          "version": "1.0.0",
+          "status": "ACTIVE",
+          "published_at": "2026-11-02T12:43:56.451Z",
+          "published_by": "System Administrator",
+          "change_summary": "Retargeting configuration for Genies",
+          "overrides": {},
+          "program_fields": [
+            {
+              "id": "f_retarget_genies_emi",
+              "key": "subsidized_zero_interest_requested",
+              "label": "Requested Subsidized Zero-Interest Plan",
+              "type": "boolean",
+              "required": true,
+              "enabled": true,
+              "priority": "High",
+              "default_value": true
+            }
+          ]
+        },
+        "smart": {
+          "version": "1.0.0",
+          "status": "ACTIVE",
+          "published_at": "2026-11-02T12:43:56.451Z",
+          "published_by": "System Administrator",
+          "change_summary": "Retargeting configuration for Smart Academy",
+          "overrides": {},
+          "program_fields": []
+        },
+        "edge": {
+          "version": "1.0.0",
+          "status": "ACTIVE",
+          "published_at": "2026-11-02T12:43:56.451Z",
+          "published_by": "System Administrator",
+          "change_summary": "Retargeting configuration for Edge",
+          "overrides": {},
+          "program_fields": [
+            {
+              "id": "f_retarget_edge_tech_interview",
+              "key": "wants_technical_interview_prep",
+              "label": "Needs Technical Re-Interview",
+              "type": "boolean",
+              "required": true,
+              "enabled": true,
+              "priority": "High",
+              "default_value": true
+            }
+          ]
+        }
+      }
+    },
+    "retention": {
+      "id": "retention",
+      "name": "Retention Team",
+      "base_fields": [
+        {
+          "id": "f_retention_student_id",
+          "key": "student_enrollment_id",
+          "label": "Student Enrollment ID",
+          "type": "text",
+          "required": true,
+          "enabled": true,
+          "priority": "Critical"
+        },
+        {
+          "id": "f_retention_current_cohort",
+          "key": "current_cohort_month",
+          "label": "Enrolled Cohort Month",
+          "type": "text",
+          "required": true,
+          "enabled": true,
+          "priority": "High",
+          "default_value": "Batch-Nov-2026"
+        },
+        {
+          "id": "f_retention_attendance",
+          "key": "attendance_percentage",
+          "label": "Live Lecture Attendance %",
+          "type": "number",
+          "required": true,
+          "enabled": true,
+          "priority": "High",
+          "default_value": 85,
+          "validation": {
+            "min": 0,
+            "max": 100
+          }
+        },
+        {
+          "id": "f_retention_nbfc",
+          "key": "active_nbfc_partner",
+          "label": "Active Disbursed NBFC Partner",
+          "type": "dropdown",
+          "required": true,
+          "enabled": true,
+          "priority": "Critical",
+          "options": [
+            "Northern Arc",
+            "Bajaj Finserv",
+            "Auxilo",
+            "Fibe",
+            "Gyandhan",
+            "Techfino",
+            "Feemonk",
+            "Jodo Flex"
+          ],
+          "default_value": "Northern Arc"
+        },
+        {
+          "id": "f_retention_restructure",
+          "key": "is_tenure_restructure_requested",
+          "label": "Tenure Restructure / Pause Requested",
+          "type": "boolean",
+          "required": false,
+          "enabled": true,
+          "priority": "Medium",
+          "default_value": false
+        }
+      ],
+      "programs": {
+        "genies": {
+          "version": "1.0.0",
+          "status": "ACTIVE",
+          "published_at": "2026-11-02T12:43:56.451Z",
+          "published_by": "System Administrator",
+          "change_summary": "Retention schema for Genies cohort",
+          "overrides": {},
+          "program_fields": []
+        },
+        "smart": {
+          "version": "1.0.0",
+          "status": "ACTIVE",
+          "published_at": "2026-11-02T12:43:56.451Z",
+          "published_by": "System Administrator",
+          "change_summary": "Retention schema for Smart Academy",
+          "overrides": {},
+          "program_fields": [
+            {
+              "id": "f_retention_project_status",
+              "key": "capstone_project_submitted",
+              "label": "Capstone Project Milestone Cleared",
+              "type": "boolean",
+              "required": true,
+              "enabled": true,
+              "priority": "High",
+              "default_value": true
+            }
+          ]
+        },
+        "edge": {
+          "version": "1.0.0",
+          "status": "ACTIVE",
+          "published_at": "2026-11-02T12:43:56.451Z",
+          "published_by": "System Administrator",
+          "change_summary": "Retention schema for Edge Guarantee Track",
+          "overrides": {
+            "attendance_percentage": {
+              "required": true,
+              "default_value": 95,
+              "validation": {
+                "min": 90,
+                "max": 100
+              }
+            }
+          },
+          "program_fields": [
+            {
+              "id": "f_retention_mock_interview_score",
+              "key": "mock_interview_rating",
+              "label": "Mock Interview Clearance Rating",
+              "type": "dropdown",
+              "required": true,
+              "enabled": true,
+              "priority": "Critical",
+              "options": [
+                "Top 10% (Hire Ready)",
+                "Ready (Minor Polish)",
+                "Needs Retake",
+                "At Risk"
+              ],
+              "default_value": "Top 10% (Hire Ready)"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

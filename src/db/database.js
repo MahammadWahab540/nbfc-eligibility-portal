@@ -75,6 +75,20 @@ class DatabaseRepository {
         approved_by TEXT,
         rules_json TEXT NOT NULL
       );
+
+      -- 4. Payload Configurations Table (Team x Program)
+      CREATE TABLE IF NOT EXISTS payload_configurations (
+        team_id TEXT NOT NULL,
+        program_id TEXT NOT NULL,
+        version TEXT NOT NULL,
+        status TEXT NOT NULL,
+        config_json TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        created_by TEXT NOT NULL,
+        change_summary TEXT,
+        PRIMARY KEY (team_id, program_id, version)
+      );
+      CREATE INDEX IF NOT EXISTS idx_payload_team_prog ON payload_configurations(team_id, program_id);
     `);
   }
 

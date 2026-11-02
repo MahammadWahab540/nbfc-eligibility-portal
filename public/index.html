@@ -52,6 +52,10 @@
           <svg class="w-3.5 h-3.5 mr-1.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           Change History
         </button>
+        <button class="apple-tab-btn" data-tab="tab-payloads">
+          <svg class="w-3.5 h-3.5 mr-1.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+          Payload Manager
+        </button>
       </div>
 
       <!-- Live Operational Status -->
@@ -71,6 +75,7 @@
         <button class="apple-tab-btn flex-1 text-center justify-center text-xs" data-tab="tab-simulator">Check</button>
         <button class="apple-tab-btn flex-1 text-center justify-center text-xs" data-tab="tab-settings">Settings</button>
         <button class="apple-tab-btn flex-1 text-center justify-center text-xs" data-tab="tab-audit">History</button>
+        <button class="apple-tab-btn flex-1 text-center justify-center text-xs" data-tab="tab-payloads">Payloads</button>
       </div>
     </div>
   </header>
@@ -402,6 +407,250 @@
 
     </section>
 
+    <!-- ================================================================= -->
+    <!-- TAB 5: BUSINESS-CONFIGURABLE PAYLOAD MANAGEMENT -->
+    <!-- ================================================================= -->
+    <section id="tab-payloads" class="tab-content hidden space-y-6 fade-in">
+      
+      <!-- Executive Overview Banner -->
+      <div class="apple-card p-6 bg-gradient-to-r from-indigo-50/70 via-blue-50/40 to-white border-indigo-100 flex flex-col md:flex-row md:items-center justify-between gap-5">
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="apple-chip chip-blue font-bold text-[10px] tracking-wider uppercase">Enterprise Self-Service</span>
+            <span class="text-xs text-slate-400 font-medium">No-Code Payload Architecture</span>
+          </div>
+          <h2 class="text-lg font-bold text-slate-900 tracking-tight mt-1">Business-Configurable Payload Manager</h2>
+          <p class="text-xs text-slate-600 mt-1 max-w-2xl leading-relaxed">
+            Empower business teams to dynamically manage, customize, prioritize, and validate incoming payload fields across every <strong>Team × Program</strong> tier without requiring developer intervention.
+          </p>
+        </div>
+
+        <!-- Role Selector & Status -->
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <div class="flex items-center space-x-2 bg-white px-3 py-1.5 rounded-2xl border border-slate-200/80 shadow-xs">
+            <span class="text-xs text-slate-500 font-semibold">User Role:</span>
+            <select id="payload-role-select" class="text-xs font-bold text-slate-800 bg-transparent focus:outline-none cursor-pointer">
+              <option value="admin">Administrator (Full Access)</option>
+              <option value="editor">Editor (Draft & Test)</option>
+              <option value="viewer">Viewer (Read-Only)</option>
+            </select>
+          </div>
+          <div class="text-xs text-slate-600 font-medium flex items-center space-x-1.5 bg-white px-3.5 py-1.5 rounded-full border border-slate-200/80 shadow-xs">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="text-slate-800 font-bold">Dynamic Engine Live</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation & Configuration Matrix Selectors -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <!-- Team Selector Pills -->
+        <div class="apple-card p-4 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">1. Select Business Team</span>
+            <span class="text-[11px] text-blue-600 font-semibold" id="team-badge-indicator">Onboarding Team</span>
+          </div>
+          <div class="grid grid-cols-3 gap-2" id="team-selector-group">
+            <button class="payload-team-btn active-segment py-2 px-3 rounded-xl border text-xs font-bold transition-all text-center" data-team="onboarding">
+              <div class="text-[11px]">Onboarding</div>
+              <div class="text-[9px] opacity-70 font-normal">KYC & Intake</div>
+            </button>
+            <button class="payload-team-btn py-2 px-3 rounded-xl border border-slate-200 text-xs font-bold transition-all text-slate-600 hover:bg-slate-50 text-center" data-team="retargeting">
+              <div class="text-[11px]">Retargeting</div>
+              <div class="text-[9px] opacity-70 font-normal">Re-engagement</div>
+            </button>
+            <button class="payload-team-btn py-2 px-3 rounded-xl border border-slate-200 text-xs font-bold transition-all text-slate-600 hover:bg-slate-50 text-center" data-team="retention">
+              <div class="text-[11px]">Retention</div>
+              <div class="text-[9px] opacity-70 font-normal">Continuity</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Program Selector Pills -->
+        <div class="apple-card p-4 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">2. Select Program Tier</span>
+            <span class="text-[11px] text-indigo-600 font-semibold" id="program-badge-indicator">Genies Program</span>
+          </div>
+          <div class="grid grid-cols-3 gap-2" id="program-selector-group">
+            <button class="payload-program-btn active-segment py-2 px-3 rounded-xl border text-xs font-bold transition-all text-center" data-program="genies">
+              <div class="text-[11px]">Genies</div>
+              <div class="text-[9px] opacity-70 font-normal">Entry Tier</div>
+            </button>
+            <button class="payload-program-btn py-2 px-3 rounded-xl border border-slate-200 text-xs font-bold transition-all text-slate-600 hover:bg-slate-50 text-center" data-program="smart">
+              <div class="text-[11px]">Smart</div>
+              <div class="text-[9px] opacity-70 font-normal">Standard Tier</div>
+            </button>
+            <button class="payload-program-btn py-2 px-3 rounded-xl border border-slate-200 text-xs font-bold transition-all text-slate-600 hover:bg-slate-50 text-center" data-program="edge">
+              <div class="text-[11px]">Edge</div>
+              <div class="text-[9px] opacity-70 font-normal">Premium Tier</div>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Impact Scope & Downstream Channels Banner -->
+      <div class="apple-card p-4 bg-gradient-to-r from-slate-50 via-white to-slate-50 border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-center space-x-3">
+          <div class="w-9 h-9 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-slate-900">Synchronized Downstream Integrations</div>
+            <p class="text-[11px] text-slate-500 mt-0.5">Payload modifications automatically enforce data validation across 3 mission-critical channels:</p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="apple-chip chip-blue text-[10px] font-semibold flex items-center space-x-1">
+            <svg class="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            <span>Salesforce CRM</span>
+          </span>
+          <span class="apple-chip chip-blue text-[10px] font-semibold flex items-center space-x-1">
+            <svg class="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            <span>KYC Web Portal</span>
+          </span>
+          <span class="apple-chip chip-blue text-[10px] font-semibold flex items-center space-x-1">
+            <svg class="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            <span>NBFC Decision Engine</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Main Payload Configuration Canvas -->
+      <div class="apple-card p-6 space-y-5">
+        
+        <!-- Header & Action Toolbar -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+          <div>
+            <div class="flex items-center space-x-2">
+              <h3 id="payload-canvas-title" class="text-base font-bold text-slate-900 tracking-tight">Onboarding Team → Genies Program</h3>
+              <span id="payload-status-chip" class="apple-chip chip-success text-[10px] font-bold">ACTIVE</span>
+              <span id="payload-version-chip" class="apple-chip chip-neutral text-[10px] font-mono font-bold">v1.0.0</span>
+              <span id="payload-draft-chip" class="hidden apple-chip chip-amber text-[10px] font-bold">UNSAVED DRAFT</span>
+            </div>
+            <p id="payload-canvas-description" class="text-xs text-slate-500 mt-1">
+              Base onboarding fields inherited with Genies program specific customizations.
+            </p>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="btn-add-payload-field" class="apple-btn-primary text-xs flex items-center space-x-1.5 shadow-sm">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              <span>Add Field</span>
+            </button>
+            <button id="btn-save-payload-draft" class="apple-btn-secondary text-xs flex items-center space-x-1.5">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+              <span>Save Draft</span>
+            </button>
+            <button id="btn-publish-payload" class="apple-btn-secondary text-xs text-emerald-700 hover:text-emerald-800 border-emerald-200 bg-emerald-50 hover:bg-emerald-100/80 flex items-center space-x-1.5 font-bold">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              <span>Publish Live</span>
+            </button>
+            <button id="btn-history-payload" class="apple-btn-secondary text-xs flex items-center space-x-1.5">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <span>History & Rollback</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter, Count & Inheritance Legend -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+          <div class="flex items-center space-x-3 w-full sm:w-auto">
+            <div class="relative flex-1 sm:w-72">
+              <input type="text" id="payload-search-filter" class="apple-input text-xs pl-8 pr-3 py-1.5" placeholder="Search fields by name or key...">
+              <svg class="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </div>
+            <span id="payload-fields-counter" class="text-slate-500 font-semibold whitespace-nowrap">0 fields</span>
+          </div>
+
+          <!-- Inheritance Legend -->
+          <div class="flex items-center space-x-2 text-[10px] text-slate-500 font-medium overflow-x-auto pb-1 sm:pb-0">
+            <span>Inheritance:</span>
+            <span class="apple-chip chip-neutral text-[9px] font-semibold">Team Base</span>
+            <span class="apple-chip chip-blue text-[9px] font-semibold">Program Specific</span>
+            <span class="apple-chip chip-amber text-[9px] font-semibold">Program Override</span>
+          </div>
+        </div>
+
+        <!-- Field Cards Container (Interactive List with Drag & Drop & Move Controls) -->
+        <div id="payload-fields-list" class="space-y-2.5 min-h-[160px]">
+          <div class="p-8 text-center text-slate-400">Loading payload configuration...</div>
+        </div>
+
+      </div>
+
+      <!-- Lower Split Workspace: Schema Preview & Interactive Payload Validator -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- Left: Live JSON Payload Schema Preview (5 Cols) -->
+        <div class="lg:col-span-5 apple-card p-5 space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div>
+              <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Live Payload Preview</h4>
+              <p class="text-[11px] text-slate-500">Real-time generated JSON conforming to active configuration.</p>
+            </div>
+            <button id="btn-copy-payload-schema" class="apple-btn-secondary text-[11px] px-2.5 py-1">
+              Copy JSON
+            </button>
+          </div>
+
+          <!-- JSON Schema Code Block -->
+          <div class="relative bg-slate-900 rounded-2xl p-4 overflow-hidden border border-slate-800 shadow-inner">
+            <pre id="payload-schema-preview" class="text-[11px] font-mono text-emerald-400 overflow-x-auto max-h-[420px] leading-relaxed">
+{
+  "loading": true
+}
+            </pre>
+          </div>
+        </div>
+
+        <!-- Right: Interactive Payload Validator & Test Runner (7 Cols) -->
+        <div class="lg:col-span-7 apple-card p-5 space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div>
+              <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Payload Validation Tester</h4>
+              <p class="text-[11px] text-slate-500">Simulate incoming lead data against the active Team × Program rules.</p>
+            </div>
+            <div class="flex items-center space-x-1.5">
+              <button id="btn-load-valid-mock" class="apple-btn-secondary text-[11px] px-2.5 py-1">
+                Load Valid
+              </button>
+              <button id="btn-load-invalid-mock" class="apple-btn-secondary text-[11px] px-2.5 py-1 text-red-600 hover:text-red-700">
+                Load Invalid
+              </button>
+            </div>
+          </div>
+
+          <!-- Payload Input Textarea -->
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Incoming Lead Payload (JSON)</label>
+            <textarea id="payload-test-input" rows="8" class="apple-input font-mono text-xs w-full bg-slate-50/70 border-slate-200" placeholder="Paste incoming payload JSON here..."></textarea>
+          </div>
+
+          <!-- Test Actions & Live Results -->
+          <div class="flex items-center justify-between pt-1">
+            <button id="btn-run-payload-validate" class="apple-btn-primary text-xs flex items-center space-x-1.5">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <span>Validate Payload</span>
+            </button>
+            <span id="validation-speed-label" class="text-[11px] text-slate-400 font-mono">Real-time local validation</span>
+          </div>
+
+          <!-- Validation Output Container -->
+          <div id="payload-validation-results" class="hidden">
+            <!-- Dynamically populated -->
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
   </main>
 
   <!-- ================================================================= -->
@@ -509,6 +758,216 @@
         </div>
 
       </form>
+
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- MODAL: ADD / EDIT PAYLOAD FIELD -->
+  <!-- ================================================================= -->
+  <div id="modal-payload-field" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full max-h-[92vh] flex flex-col shadow-2xl border border-black/[0.08] overflow-hidden fade-in">
+      
+      <!-- Modal Header -->
+      <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
+        <div>
+          <h3 id="modal-field-title" class="text-base font-bold text-slate-900 tracking-tight">Add Payload Field</h3>
+          <p class="text-xs text-slate-500 mt-0.5">Configure data attribute, validation rules, and business priority.</p>
+        </div>
+        <button id="btn-close-field-modal" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-full hover:bg-slate-200/60 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Modal Body (Form) -->
+      <form id="payload-field-form" class="p-6 overflow-y-auto space-y-4 text-xs">
+        <input type="hidden" id="field-edit-mode" value="add">
+        <input type="hidden" id="field-original-key" value="">
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Field Label <span class="text-red-500">*</span></label>
+            <input type="text" id="field-label-input" class="apple-input font-medium" placeholder="e.g. Monthly Income" required>
+            <span class="text-[10px] text-slate-400">Human-readable label</span>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Payload Key <span class="text-red-500">*</span></label>
+            <input type="text" id="field-key-input" class="apple-input font-mono font-medium" placeholder="e.g. monthly_income" required>
+            <span class="text-[10px] text-slate-400">JSON key in payload</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Field Type <span class="text-red-500">*</span></label>
+            <select id="field-type-select" class="apple-input font-medium bg-white">
+              <option value="text">Text (String)</option>
+              <option value="number">Number</option>
+              <option value="currency">Currency (₹)</option>
+              <option value="boolean">Boolean (True / False)</option>
+              <option value="date">Date (YYYY-MM-DD)</option>
+              <option value="dropdown">Dropdown (Enum)</option>
+              <option value="phone">Phone Number (10 digits)</option>
+              <option value="email">Email Address</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Priority Level <span class="text-red-500">*</span></label>
+            <select id="field-priority-select" class="apple-input font-medium bg-white">
+              <option value="critical">Critical (P0 - Required for EMI)</option>
+              <option value="high">High (P1 - Lender Matching)</option>
+              <option value="medium">Medium (P2 - Verification)</option>
+              <option value="low">Low (P3 - Informational)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Dropdown Options (Conditional) -->
+        <div id="field-dropdown-options-container" class="hidden">
+          <label class="block font-semibold text-slate-700 mb-1">Dropdown Allowed Options</label>
+          <input type="text" id="field-options-input" class="apple-input font-medium" placeholder="SALARIED, SELF_EMPLOYED, BUSINESS">
+          <span class="text-[10px] text-slate-400">Comma-separated list of valid choices</span>
+        </div>
+
+        <!-- Flags: Mandatory & Active -->
+        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 grid grid-cols-2 gap-3">
+          <label class="flex items-center space-x-2 cursor-pointer select-none">
+            <input type="checkbox" id="field-required-checkbox" class="apple-checkbox">
+            <span class="font-semibold text-slate-800 text-[11px]">Mandatory Field</span>
+          </label>
+          <label class="flex items-center space-x-2 cursor-pointer select-none">
+            <input type="checkbox" id="field-enabled-checkbox" class="apple-checkbox" checked>
+            <span class="font-semibold text-slate-800 text-[11px]">Field Active (Enabled)</span>
+          </label>
+        </div>
+
+        <!-- Default Value & Help Text -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Default Value</label>
+            <input type="text" id="field-default-input" class="apple-input font-medium" placeholder="Optional fallback">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Placeholder Text</label>
+            <input type="text" id="field-placeholder-input" class="apple-input font-medium" placeholder="e.g. Enter ₹ amount">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Help Text / Business Guideline</label>
+          <input type="text" id="field-help-input" class="apple-input font-medium" placeholder="e.g. As shown on latest 3 months bank statement">
+        </div>
+
+        <!-- Validation Bounds -->
+        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+          <div class="font-bold text-slate-700 text-[10px] uppercase tracking-wider">Validation Rules (Optional)</div>
+          <div class="grid grid-cols-3 gap-2">
+            <div>
+              <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Min Value / Len</label>
+              <input type="number" id="field-min-input" class="apple-input text-xs" placeholder="e.g. 18000">
+            </div>
+            <div>
+              <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Max Value / Len</label>
+              <input type="number" id="field-max-input" class="apple-input text-xs" placeholder="e.g. 900">
+            </div>
+            <div>
+              <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Regex Pattern</label>
+              <input type="text" id="field-pattern-input" class="apple-input text-xs font-mono" placeholder="^[0-9]+$">
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="pt-3 border-t border-slate-100 flex items-center justify-end space-x-2.5">
+          <button type="button" id="btn-cancel-field-modal" class="apple-btn-secondary">Cancel</button>
+          <button type="submit" id="btn-save-field-submit" class="apple-btn-primary">Save Field</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- MODAL: PUBLISH LIVE CONFIRMATION -->
+  <!-- ================================================================= -->
+  <div id="modal-payload-publish" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-black/[0.08] overflow-hidden fade-in">
+      
+      <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-emerald-50/60">
+        <div class="flex items-center space-x-3">
+          <div class="w-9 h-9 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900 tracking-tight">Publish Configuration Live</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Deploy changes immediately to active channels</p>
+          </div>
+        </div>
+        <button id="btn-close-publish-modal" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-full hover:bg-slate-200/60 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4 text-xs">
+        <div class="flex items-center justify-between bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+          <div>
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Target Configuration</span>
+            <span id="publish-target-label" class="font-bold text-slate-900 text-xs">Onboarding → Genies</span>
+          </div>
+          <div class="text-right">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Version Bump</span>
+            <div class="flex items-center space-x-1.5 font-mono font-bold text-xs mt-0.5">
+              <span id="publish-current-version" class="text-slate-500">v1.0.0</span>
+              <span class="text-slate-400">→</span>
+              <span id="publish-next-version" class="text-emerald-600 font-extrabold">v1.1.0</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Change Summary / Audit Note <span class="text-red-500">*</span></label>
+          <textarea id="publish-summary-input" rows="3" class="apple-input w-full text-xs" placeholder="e.g. Added personal laptop requirement and updated income floor to ₹20,000 for Genies."></textarea>
+        </div>
+
+        <div class="p-3 rounded-xl bg-amber-50/80 border border-amber-200 text-amber-900 text-[11px] leading-relaxed">
+          <strong>Notice:</strong> Publishing this configuration activates schema validation immediately across Salesforce CRM, KYC portal, and NBFC evaluation pipelines.
+        </div>
+
+        <div class="pt-2 border-t border-slate-100 flex items-center justify-end space-x-2.5">
+          <button type="button" id="btn-cancel-publish-modal" class="apple-btn-secondary">Cancel</button>
+          <button type="button" id="btn-confirm-publish-live" class="apple-btn-primary bg-emerald-600 hover:bg-emerald-700">Confirm & Publish</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- MODAL: VERSION HISTORY & ROLLBACK -->
+  <!-- ================================================================= -->
+  <div id="modal-payload-history" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl border border-black/[0.08] overflow-hidden fade-in">
+      
+      <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
+        <div>
+          <h3 class="text-base font-bold text-slate-900 tracking-tight">Configuration Version History</h3>
+          <p id="history-modal-context" class="text-xs text-slate-500 mt-0.5">Review audit trail and rollback to previous version snapshots.</p>
+        </div>
+        <button id="btn-close-history-modal" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-full hover:bg-slate-200/60 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-3" id="payload-history-container">
+        <!-- Rendered dynamically -->
+        <div class="p-8 text-center text-slate-400 text-xs">Loading history snapshots...</div>
+      </div>
+
+      <div class="p-4 border-t border-slate-100 flex items-center justify-between bg-slate-50 text-xs">
+        <span class="text-slate-500">Every rollback is non-destructive and tracked with author info.</span>
+        <button type="button" id="btn-close-history-footer" class="apple-btn-secondary">Close</button>
+      </div>
 
     </div>
   </div>
