@@ -1,6 +1,18 @@
 /**
  * Applicant Data Normalizer & Attribute Extractor
- * Extracts 3-valued attributes without fabricating default 0 or truthy values.
+ * Supports both:
+ * 1. Direct Salesforce Production Field Schema (Flat SOQL query format):
+ *    - Academy_Onboarding_PRE__r.userId__c
+ *    - Id
+ *    - Name
+ *    - CIBIL_SCORE_RANGE_PRE__c
+ *    - RELATION_WITH_THE_COAPPLICANT_PRE__c
+ *    - COAPPLICANT_MONTHLY_INCOME_PRE__c / COAPP_MONTHLY_INCOME_PRE__c
+ *    - Co_Applicant_Occupation_PRE__c
+ *    - Co_Applicant_state_pre__c
+ *    - Co_Applicant_age_pre__c
+ *    - Co_Applicant_s_Bank_Name_PRE__c
+ * 2. Nested Microservice Schema (co_applicant_details, cibil_details, etc.)
  */
 
 const { normalizeRelationship } = require('../config/relationship_map');
@@ -14,28 +26,47 @@ function normalizeApplicant(payload = {}, parameterQuestions = null) {
   const addr = payload.address_details || {};
   const user = payload.user_details || {};
 
-  // 1. CIBIL score extraction
+  // 1. Identifiers (Salesforce Id & User Id)
+  const salesforceId = payload.Id || payload.salesforce_id || user.salesforce_id || null;
+  const userApplicantId =
+    payload['Academy_Onboarding_PRE__r.userId__c'] ||
+    payload.Academy_Onboarding_PRE__r?.userId__c ||
+    payload.userId__c ||
+    user.user_id ||
+    coApp.user_applicant_id ||
+    payload.user_id ||
+    'unspecified-user';
+
+  // 2. Name
+  const name = payload.Name || coApp.name || payload.name || 'Applicant';
+
+  // 3. CIBIL score extraction (Supports CIBIL_SCORE_RANGE_PRE__c)
   let exactScore = null;
   let rangeString = null;
 
-  if (typeof cibil.cibil_score === 'number' && !isNaN(cibil.cibil_score)) {
-    exactScore = cibil.cibil_score;
-  } else if (typeof cibil.cibil_score === 'string' && cibil.cibil_score.trim()) {
-    const parsed = parseInt(cibil.cibil_score.trim(), 10);
-    if (!isNaN(parsed) && parsed > 0) {
-      exactScore = parsed;
-    }
+  const rawRange = payload.CIBIL_SCORE_RANGE_PRE__c || cibil.cibil_score_range || payload.cibil_score_range || null;
+  if (rawRange && typeof rawRange === 'string') {
+    rangeString = rawRange.trim();
   }
 
-  if (cibil.cibil_score_range && typeof cibil.cibil_score_range === 'string') {
-    rangeString = cibil.cibil_score_range.trim();
+  const rawExactScore = cibil.cibil_score !== undefined ? cibil.cibil_score : payload.cibil_score;
+  if (typeof rawExactScore === 'number' && !isNaN(rawExactScore)) {
+    exactScore = rawExactScore;
+  } else if (typeof rawExactScore === 'string' && rawExactScore.trim()) {
+    const parsed = parseInt(rawExactScore.trim(), 10);
+    if (!isNaN(parsed) && parsed > 0) exactScore = parsed;
   }
 
-  // 2. Income extraction (Strict null preservation)
+  // 4. Monthly Income (Supports COAPPLICANT_MONTHLY_INCOME_PRE__c & COAPP_MONTHLY_INCOME_PRE__c)
   let monthlyIncome = null;
-  const rawIncome = emp.monthly_income !== undefined && emp.monthly_income !== null
-    ? emp.monthly_income
-    : (payload.coapplicant_monthly_income !== undefined ? payload.coapplicant_monthly_income : null);
+  const rawIncome =
+    payload.COAPPLICANT_MONTHLY_INCOME_PRE__c !== undefined && payload.COAPPLICANT_MONTHLY_INCOME_PRE__c !== null && payload.COAPPLICANT_MONTHLY_INCOME_PRE__c !== ''
+      ? payload.COAPPLICANT_MONTHLY_INCOME_PRE__c
+      : (payload.COAPP_MONTHLY_INCOME_PRE__c !== undefined && payload.COAPP_MONTHLY_INCOME_PRE__c !== null && payload.COAPP_MONTHLY_INCOME_PRE__c !== ''
+          ? payload.COAPP_MONTHLY_INCOME_PRE__c
+          : (emp.monthly_income !== undefined && emp.monthly_income !== null && emp.monthly_income !== ''
+              ? emp.monthly_income
+              : null));
 
   if (rawIncome !== null && rawIncome !== '') {
     const parsed = parseFloat(rawIncome);
@@ -44,9 +75,15 @@ function normalizeApplicant(payload = {}, parameterQuestions = null) {
     }
   }
 
-  // 3. Age extraction (Strict null preservation)
+  // 5. Co-Applicant Age (Supports Co_Applicant_age_pre__c)
   let age = null;
-  const rawAge = coApp.age !== undefined && coApp.age !== null ? coApp.age : payload.coapplicant_age;
+  const rawAge =
+    payload.Co_Applicant_age_pre__c !== undefined && payload.Co_Applicant_age_pre__c !== null && payload.Co_Applicant_age_pre__c !== ''
+      ? payload.Co_Applicant_age_pre__c
+      : (coApp.age !== undefined && coApp.age !== null && coApp.age !== ''
+          ? coApp.age
+          : null);
+
   if (rawAge !== null && rawAge !== '') {
     const parsed = parseInt(rawAge, 10);
     if (!isNaN(parsed)) {
@@ -54,36 +91,55 @@ function normalizeApplicant(payload = {}, parameterQuestions = null) {
     }
   }
 
-  // 4. Relationship normalization
-  const rawRelation = coApp.relation || payload.relation_with_coapplicant || '';
+  // 6. Relationship (Supports RELATION_WITH_THE_COAPPLICANT_PRE__c)
+  const rawRelation =
+    payload.RELATION_WITH_THE_COAPPLICANT_PRE__c ||
+    coApp.relation ||
+    payload.relation ||
+    '';
   const normalizedRelation = normalizeRelationship(rawRelation);
 
-  // 5. Occupation & Employment
-  const rawOcc = emp.occupation || payload.coapplicant_occupation || '';
+  // 7. Occupation (Supports Co_Applicant_Occupation_PRE__c)
+  const rawOcc =
+    payload.Co_Applicant_Occupation_PRE__c ||
+    emp.occupation ||
+    payload.occupation ||
+    '';
   const normalizedOccupation = {
     raw: rawOcc.trim(),
     code: rawOcc.trim().toUpperCase().replace(/\s+/g, '_'),
     is_unspecified: !rawOcc || rawOcc.trim() === ''
   };
 
-  // 6. Bank classification
-  const rawBank = bank.bank_name || payload.coapplicant_bank_name || '';
+  // 8. Bank (Supports Co_Applicant_s_Bank_Name_PRE__c)
+  const rawBank =
+    payload.Co_Applicant_s_Bank_Name_PRE__c ||
+    bank.bank_name ||
+    payload.bank_name ||
+    '';
   const classifiedBank = classifyBank(rawBank);
 
-  // 7. Location with approved multi-tier fallback:
-  // Tier 1: co-applicant location
-  // Tier 2: verified address details
-  // Tier 3: primary user location
-  let state = coApp.state ? coApp.state.trim() : (addr.state ? addr.state.trim() : (user.state ? user.state.trim() : ''));
-  let city = coApp.city ? coApp.city.trim() : (addr.city ? addr.city.trim() : (user.city ? user.city.trim() : ''));
+  // 9. State & City Location (Supports Co_Applicant_state_pre__c)
+  let state =
+    payload.Co_Applicant_state_pre__c ||
+    coApp.state ||
+    addr.state ||
+    user.state ||
+    '';
+  let city =
+    payload.Co_Applicant_city_pre__c ||
+    coApp.city ||
+    addr.city ||
+    user.city ||
+    '';
 
   const location = {
-    state: state || null,
-    city: city || null,
-    source: coApp.state ? 'CO_APPLICANT' : (addr.state ? 'ADDRESS_DETAILS' : (user.state ? 'PRIMARY_USER' : 'NONE'))
+    state: state ? state.trim() : null,
+    city: city ? city.trim() : null,
+    source: payload.Co_Applicant_state_pre__c ? 'SALESFORCE_COAPP_FIELD' : (coApp.state ? 'CO_APPLICANT' : 'ADDRESS_DETAILS')
   };
 
-  // 8. The 4 Verification Questions + Door Number
+  // 10. Parameter Questions
   const hasExplicitQuestions = Boolean(parameterQuestions || payload.parameter_questions);
   const qSource = parameterQuestions || payload.parameter_questions || {};
   const questions = {
@@ -105,14 +161,10 @@ function normalizeApplicant(payload = {}, parameterQuestions = null) {
       : (addr.door_number || coApp.door_number ? true : undefined)
   };
 
-  // Identifiers
-  const userApplicantId = coApp.user_applicant_id || user.user_id || payload.user_id || 'unspecified-user';
-  const salesforceId = payload.salesforce_id || user.salesforce_id || payload.Id || null;
-
   return {
     userApplicantId,
     salesforceId,
-    name: coApp.name || payload.name || 'Applicant',
+    name,
     cibil: {
       exact_score: exactScore,
       range_string: rangeString
