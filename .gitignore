@@ -8,6 +8,11 @@ node_modules/
 batch_results.json
 nbfc_sheet_exported.csv
 
+# SQLite local database files
+*.db
+*.db-shm
+*.db-wal
+
 # Logs & temp
 *.log
 npm-debug.log*

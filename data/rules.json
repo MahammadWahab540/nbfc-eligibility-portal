@@ -1,88 +1,133 @@
 {
-  "version": "1.1.0",
-  "last_updated": "2026-11-02T04:56:59.693Z",
+  "version": "1.2.0",
+  "last_updated": "2026-11-02T11:55:00.000Z",
   "partners": [
     {
-      "id": "gyandhan",
-      "name": "Gyandhan",
+      "id": "northern_arc",
+      "code": "NORTHERN_ARC",
+      "name": "Northern Arc",
       "is_active": true,
-      "priority": 5,
-      "description": "Prime education loan specialist with strict KYC and regional filters.",
+      "priority": 1,
+      "description": "Supports low/zero income barriers with spouse co-applicant eligibility.",
+      "discrepancy_status": "NEEDS_BUSINESS_CONFIRMATION",
+      "discrepancy_notes": "Conflict between BRD row 35 (CIBIL >675, ₹0 income, J&K/North East/Odisha rejected) and initial config (CIBIL 651, ₹18k income, no region filter). Operating under conservative configured rules pending business ops sign-off.",
       "criteria": {
-        "cibil_min": 711,
-        "monthly_income_min": 25000,
+        "cibil_min": 651,
+        "monthly_income_min": 18000,
+        "age_min": 21,
         "age_max": 58,
         "allowed_relations": [
           "Mother",
           "Father",
+          "Grandfather",
           "Sibling",
+          "Siblings",
+          "Brother",
+          "Sister",
+          "Any relative",
+          "Spouse",
           "Blood relation"
         ],
         "rejected_occupations": [
           "POLITICIAN",
-          "LAWYER",
-          "PRACTICING_LAWYER",
-          "LAW_STUDENT",
-          "LOTTERY_AGENCY",
-          "CHIT_FUND",
-          "FILM_TV_STAR",
-          "CELEBRITY",
-          "ANTI_SOCIAL_ELEMENTS"
+          "FREELANCER"
         ],
-        "rejected_regions": [
-          {
-            "state": "Jammu & Kashmir"
-          },
-          {
-            "state": "Ladakh"
-          },
-          {
-            "state": "Tripura"
-          },
-          {
-            "state": "Meghalaya"
-          },
-          {
-            "state": "Mizoram"
-          },
-          {
-            "state": "Nagaland"
-          },
-          {
-            "state": "Arunachal Pradesh"
-          },
-          {
-            "state": "Andaman & Nicobar"
-          },
-          {
-            "state": "Lakshadweep"
-          },
-          {
-            "state": "Manipur"
-          },
-          {
-            "state": "Assam",
-            "exceptions": [
-              "Guwahati"
-            ]
-          },
-          {
-            "state": "Sikkim",
-            "exceptions": [
-              "Gangtok"
-            ]
-          }
-        ],
-        "pan_aadhaar_linked_mandatory": true,
-        "pan_card_mandatory": true,
-        "dob_mismatch_allowed": false,
+        "rejected_regions": [],
+        "pan_aadhaar_linked_mandatory": false,
+        "pan_card_mandatory": false,
+        "dob_mismatch_allowed": true,
         "name_mismatch_allowed": false,
         "non_nationalised_bank_accepted": true,
         "door_number_mandatory": false
       }
     },
     {
+      "id": "bajaj",
+      "code": "BAJAJ",
+      "name": "Bajaj Finserv",
+      "is_active": true,
+      "priority": 2,
+      "description": "Institutional retail lender. High CIBIL cutoff (>720), higher age allowance (up to 65 yrs).",
+      "criteria": {
+        "cibil_min": 721,
+        "monthly_income_min": 15000,
+        "age_min": 21,
+        "age_max": 65,
+        "allowed_relations": [
+          "Mother",
+          "Father",
+          "Sibling",
+          "Siblings",
+          "Brother",
+          "Sister",
+          "Blood relation"
+        ],
+        "rejected_occupations": [
+          "HOUSEWIFE",
+          "STUDENT",
+          "MEDIA",
+          "POLITICIAN",
+          "CELEBRITY"
+        ],
+        "rejected_regions": [],
+        "pan_aadhaar_linked_mandatory": true,
+        "pan_card_mandatory": true,
+        "dob_mismatch_allowed": false,
+        "name_mismatch_allowed": false,
+        "non_nationalised_bank_accepted": false,
+        "door_number_mandatory": false
+      }
+    },
+    {
+      "id": "auxilo",
+      "code": "AUXILO",
+      "name": "Auxilo",
+      "is_active": true,
+      "priority": 3,
+      "description": "Education NBFC allowing legal guardians. Strict non-nationalised bank and mismatch restrictions.",
+      "criteria": {
+        "cibil_min": 651,
+        "monthly_income_min": 25000,
+        "age_min": 21,
+        "age_max": 58,
+        "allowed_relations": [
+          "Mother",
+          "Father",
+          "Grandfather",
+          "Sibling",
+          "Siblings",
+          "Brother",
+          "Sister",
+          "Legal Guardian",
+          "Blood relation"
+        ],
+        "rejected_occupations": [],
+        "rejected_regions": [
+          { "state": "Jammu & Kashmir" },
+          { "state": "Lakshadweep" },
+          { "state": "Andaman & Nicobar" },
+          { "state": "Meghalaya" },
+          { "state": "Nagaland" },
+          { "state": "Manipur" },
+          { "state": "Tripura" },
+          { "state": "Mizoram" },
+          { "state": "Arunachal Pradesh" },
+          {
+            "state": "Chhattisgarh",
+            "exceptions": ["Bhilai", "Raipur", "Durg", "Bilaspur"]
+          }
+        ],
+        "pan_aadhaar_linked_mandatory": true,
+        "pan_card_mandatory": true,
+        "dob_mismatch_allowed": false,
+        "name_mismatch_allowed": false,
+        "non_nationalised_bank_accepted": false,
+        "door_number_mandatory": false
+      }
+    },
+    {
       "id": "fibe",
+      "code": "FIBE",
       "name": "Fibe",
       "is_active": true,
       "priority": 4,
@@ -90,6 +135,7 @@
       "criteria": {
         "cibil_min": 651,
         "monthly_income_min": 15000,
+        "age_min": 21,
         "age_max": 59,
         "allowed_relations": [
           "Mother",
@@ -97,7 +143,11 @@
           "Grandfather",
           "Sibling",
           "Siblings",
-          "Any relative"
+          "Brother",
+          "Sister",
+          "Any relative",
+          "Blood relation",
+          "Spouse"
         ],
         "rejected_occupations": [
           "POLITICIAN",
@@ -118,104 +168,68 @@
       }
     },
     {
-      "id": "northern_arc",
-      "name": "Northern Arc",
+      "id": "gyandhan",
+      "code": "GYANDHAN",
+      "name": "Gyandhan",
       "is_active": true,
-      "priority": 1,
-      "description": "Supports low/zero income barriers with spouse co-applicant eligibility.",
+      "priority": 5,
+      "description": "Prime education loan specialist with strict KYC and regional filters.",
       "criteria": {
-        "cibil_min": 651,
-        "monthly_income_min": 18000,
+        "cibil_min": 711,
+        "monthly_income_min": 25000,
+        "age_min": 21,
         "age_max": 58,
         "allowed_relations": [
           "Mother",
           "Father",
-          "Grandfather",
           "Sibling",
           "Siblings",
-          "Any relative",
-          "Spouse"
+          "Brother",
+          "Sister",
+          "Blood relation"
         ],
         "rejected_occupations": [
           "POLITICIAN",
-          "FREELANCER"
+          "LAWYER",
+          "PRACTICING_LAWYER",
+          "LAW_STUDENT",
+          "LOTTERY_AGENCY",
+          "CHIT_FUND",
+          "FILM_TV_STAR",
+          "CELEBRITY",
+          "ANTI_SOCIAL_ELEMENTS"
         ],
-        "rejected_regions": [],
-        "pan_aadhaar_linked_mandatory": false,
-        "pan_card_mandatory": false,
-        "dob_mismatch_allowed": true,
-        "name_mismatch_allowed": false,
-        "non_nationalised_bank_accepted": true,
-        "door_number_mandatory": false
-      }
-    },
-    {
-      "id": "auxilo",
-      "name": "Auxilo",
-      "is_active": true,
-      "priority": 3,
-      "description": "Education NBFC allowing legal guardians. Strict non-nationalised bank and mismatch restrictions.",
-      "criteria": {
-        "cibil_min": 651,
-        "monthly_income_min": 25000,
-        "age_max": 58,
-        "allowed_relations": [
-          "Mother",
-          "Father",
-          "Grandfather",
-          "Sibling",
-          "Siblings",
-          "Legal Guardian"
-        ],
-        "rejected_occupations": [],
         "rejected_regions": [
+          { "state": "Jammu & Kashmir" },
+          { "state": "Ladakh" },
+          { "state": "Tripura" },
+          { "state": "Meghalaya" },
+          { "state": "Mizoram" },
+          { "state": "Nagaland" },
+          { "state": "Arunachal Pradesh" },
+          { "state": "Andaman & Nicobar" },
+          { "state": "Lakshadweep" },
+          { "state": "Manipur" },
           {
-            "state": "Jammu & Kashmir"
+            "state": "Assam",
+            "exceptions": ["Guwahati"]
           },
           {
-            "state": "Lakshadweep"
-          },
-          {
-            "state": "Andaman & Nicobar"
-          },
-          {
-            "state": "Meghalaya"
-          },
-          {
-            "state": "Nagaland"
-          },
-          {
-            "state": "Manipur"
-          },
-          {
-            "state": "Tripura"
-          },
-          {
-            "state": "Mizoram"
-          },
-          {
-            "state": "Arunachal Pradesh"
-          },
-          {
-            "state": "Chhattisgarh",
-            "exceptions": [
-              "Bhilai",
-              "Raipur",
-              "Durg",
-              "Bilaspur"
-            ]
+            "state": "Sikkim",
+            "exceptions": ["Gangtok"]
           }
         ],
         "pan_aadhaar_linked_mandatory": true,
         "pan_card_mandatory": true,
         "dob_mismatch_allowed": false,
         "name_mismatch_allowed": false,
-        "non_nationalised_bank_accepted": false,
+        "non_nationalised_bank_accepted": true,
         "door_number_mandatory": false
       }
     },
     {
       "id": "techfino",
+      "code": "TECHFINO",
       "name": "Techfino",
       "is_active": true,
       "priority": 6,
@@ -223,39 +237,27 @@
       "criteria": {
         "cibil_min": 651,
         "monthly_income_min": 25000,
+        "age_min": 21,
         "age_max": 58,
         "allowed_relations": [
           "Mother",
           "Father",
           "Sibling",
+          "Siblings",
+          "Brother",
+          "Sister",
           "Blood relation"
         ],
         "rejected_occupations": [],
         "rejected_regions": [
-          {
-            "state": "Jammu & Kashmir"
-          },
-          {
-            "state": "Meghalaya"
-          },
-          {
-            "state": "Nagaland"
-          },
-          {
-            "state": "Andaman & Nicobar"
-          },
-          {
-            "state": "Lakshadweep"
-          },
-          {
-            "state": "Assam"
-          },
-          {
-            "state": "Sikkim"
-          },
-          {
-            "state": "Tripura"
-          }
+          { "state": "Jammu & Kashmir" },
+          { "state": "Meghalaya" },
+          { "state": "Nagaland" },
+          { "state": "Andaman & Nicobar" },
+          { "state": "Lakshadweep" },
+          { "state": "Assam" },
+          { "state": "Sikkim" },
+          { "state": "Tripura" }
         ],
         "pan_aadhaar_linked_mandatory": true,
         "pan_card_mandatory": true,
@@ -263,38 +265,6 @@
         "name_mismatch_allowed": false,
         "non_nationalised_bank_accepted": true,
         "door_number_mandatory": true
-      }
-    },
-    {
-      "id": "bajaj",
-      "name": "Bajaj Finserv",
-      "is_active": true,
-      "priority": 2,
-      "description": "Institutional retail lender. High CIBIL cutoff (>720), higher age allowance (up to 65 yrs).",
-      "criteria": {
-        "cibil_min": 721,
-        "monthly_income_min": 15000,
-        "age_max": 65,
-        "allowed_relations": [
-          "Mother",
-          "Father",
-          "Sibling",
-          "Blood relation"
-        ],
-        "rejected_occupations": [
-          "HOUSEWIFE",
-          "STUDENT",
-          "MEDIA",
-          "POLITICIAN",
-          "CELEBRITY"
-        ],
-        "rejected_regions": [],
-        "pan_aadhaar_linked_mandatory": true,
-        "pan_card_mandatory": true,
-        "dob_mismatch_allowed": false,
-        "name_mismatch_allowed": false,
-        "non_nationalised_bank_accepted": false,
-        "door_number_mandatory": false
       }
     }
   ]

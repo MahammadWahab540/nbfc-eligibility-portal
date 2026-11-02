@@ -1,11 +1,12 @@
 {
   "name": "nbfc-eligibility-portal",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Centralised NBFC Eligibility Engine and Salesforce Integration Configuration Portal",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node test-scenarios.js"
+    "test": "node run_all_tests.js",
+    "test:scenarios": "node test-scenarios.js"
   },
   "keywords": ["nbfc", "fintech", "eligibility-engine", "rules", "salesforce"],
   "author": "Google Antigravity Engineering",

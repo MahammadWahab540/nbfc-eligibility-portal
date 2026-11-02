@@ -1,19 +1,21 @@
 /**
- * Complete Full-Stack Backend Server for NBFC Portal
- * Serves REST APIs and Static Configuration Dashboard UI
+ * Production NBFC Eligibility Engine & Salesforce Integration Server
+ * Serves REST APIs, Persistence Layer (SQLite), and Static Configuration Dashboard UI
  */
 
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const NBFCSuggestionEngine = require('./engine');
+const NBFCEligibilityEngine = require('./src/engine/index');
+const { getDatabaseRepository } = require('./src/db/database');
+const SalesforceSyncService = require('./src/services/salesforce_sync');
 
-const engine = new NBFCSuggestionEngine({ dataPath: path.join(__dirname, 'data') });
+const db = getDatabaseRepository();
+const engine = new NBFCEligibilityEngine({ dataPath: path.join(__dirname, 'data'), db });
+const sfSyncService = new SalesforceSyncService({ db });
+
 const PORT = process.env.PORT || 3000;
-
-// In-memory evaluation cache
-const evaluationStore = new Map();
-const evaluationHistory = [];
+const ADMIN_API_KEY = process.env.ADMIN_API_KEY || null;
 
 function sendJSON(res, statusCode, data) {
   res.writeHead(statusCode, { 'Content-Type': 'application/json' });
@@ -46,6 +48,13 @@ function serveStaticFile(res, filePath, contentType) {
   });
 }
 
+function checkAdminAuth(req) {
+  if (!ADMIN_API_KEY) return true; // Open if not explicitly configured
+  const authHeader = req.headers['authorization'] || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+  return token === ADMIN_API_KEY;
+}
+
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const pathname = url.pathname;
@@ -53,7 +62,7 @@ const server = http.createServer(async (req, res) => {
   // Global CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Idempotency-Key');
 
   if (req.method === 'OPTIONS') {
     res.writeHead(204);
@@ -77,13 +86,16 @@ const server = http.createServer(async (req, res) => {
     }
 
     // -------------------------------------------------------------
-    // API: SYSTEM HEALTH
+    // API: SYSTEM HEALTH & READINESS
     // -------------------------------------------------------------
     if (req.method === 'GET' && pathname === '/health') {
+      engine.loadData();
       return sendJSON(res, 200, {
         status: 'HEALTHY',
-        version: engine.ruleSet.version,
+        version: engine.ruleSet.version || '1.2.0',
         active_partners: engine.ruleSet.partners.filter(p => p.is_active).length,
+        persistence: 'SQLite (node:sqlite DatabaseSync)',
+        salesforce_sync_adapter: sfSyncService.syncUrl ? 'LIVE_HTTPS' : 'VERIFIED_MOCK_ADAPTER',
         timestamp: new Date().toISOString()
       });
     }
@@ -101,9 +113,13 @@ const server = http.createServer(async (req, res) => {
     }
 
     // -------------------------------------------------------------
-    // API: UPDATE SINGLE PARTNER CRITERIA
+    // API: UPDATE SINGLE PARTNER CRITERIA (ADMIN AUTH PROTECTED)
     // -------------------------------------------------------------
     if (req.method === 'PUT' && pathname.match(/^\/api\/v1\/partners\/([^/]+)$/)) {
+      if (!checkAdminAuth(req)) {
+        return sendJSON(res, 401, { error: 'Unauthorized', message: 'Valid Admin Bearer token required' });
+      }
+
       const partnerId = pathname.split('/').pop().toLowerCase();
       const body = await parseBody(req);
       engine.loadData();
@@ -113,7 +129,6 @@ const server = http.createServer(async (req, res) => {
         return sendJSON(res, 404, { error: 'Partner not found' });
       }
 
-      // Update fields
       if (body.name) partner.name = body.name;
       if (body.description !== undefined) partner.description = body.description;
       if (body.priority !== undefined) partner.priority = parseInt(body.priority, 10);
@@ -125,8 +140,7 @@ const server = http.createServer(async (req, res) => {
         };
       }
 
-      // Bump minor version
-      const vParts = (engine.ruleSet.version || '1.0.0').split('.');
+      const vParts = (engine.ruleSet.version || '1.2.0').split('.');
       vParts[2] = parseInt(vParts[2] || '0', 10) + 1;
       engine.ruleSet.version = vParts.join('.');
 
@@ -143,6 +157,10 @@ const server = http.createServer(async (req, res) => {
     // API: TOGGLE PARTNER ACTIVE STATUS
     // -------------------------------------------------------------
     if (req.method === 'PATCH' && pathname.match(/^\/api\/v1\/partners\/([^/]+)\/status$/)) {
+      if (!checkAdminAuth(req)) {
+        return sendJSON(res, 401, { error: 'Unauthorized', message: 'Valid Admin Bearer token required' });
+      }
+
       const partnerId = pathname.split('/')[4].toLowerCase();
       const body = await parseBody(req);
       engine.loadData();
@@ -170,7 +188,11 @@ const server = http.createServer(async (req, res) => {
     // API: REORDER PRIORITIES
     // -------------------------------------------------------------
     if (req.method === 'POST' && pathname === '/api/v1/partners/reorder') {
-      const body = await parseBody(req); // expects { order: ['gyandhan', 'fibe', ...] }
+      if (!checkAdminAuth(req)) {
+        return sendJSON(res, 401, { error: 'Unauthorized', message: 'Valid Admin Bearer token required' });
+      }
+
+      const body = await parseBody(req);
       if (!Array.isArray(body.order)) {
         return sendJSON(res, 400, { error: 'Order must be an array of partner IDs' });
       }
@@ -202,6 +224,10 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (req.method === 'PUT' && pathname === '/api/v1/settings') {
+      if (!checkAdminAuth(req)) {
+        return sendJSON(res, 401, { error: 'Unauthorized', message: 'Valid Admin Bearer token required' });
+      }
+
       const body = await parseBody(req);
       const settingsPath = path.join(engine.dataPath, 'settings.json');
       const updated = { ...engine.settings, ...body };
@@ -212,16 +238,10 @@ const server = http.createServer(async (req, res) => {
     }
 
     // -------------------------------------------------------------
-    // API: GET AUDIT LOGS
+    // API: GET AUDIT LOGS (FROM SQLITE)
     // -------------------------------------------------------------
     if (req.method === 'GET' && pathname === '/api/v1/audit') {
-      const auditPath = path.join(engine.dataPath, 'audit.json');
-      let logs = [];
-      try {
-        logs = JSON.parse(fs.readFileSync(auditPath, 'utf8') || '[]');
-      } catch (e) {
-        logs = [];
-      }
+      const logs = db.getAuditLogs(100);
       return sendJSON(res, 200, { total: logs.length, logs });
     }
 
@@ -230,70 +250,79 @@ const server = http.createServer(async (req, res) => {
     // -------------------------------------------------------------
     if (req.method === 'POST' && pathname === '/api/v1/eligibility/evaluate') {
       const body = await parseBody(req);
-      const parameterQuestions = body.parameter_questions || {};
+      const parameterQuestions = body.parameter_questions || null;
+      const idempotencyKey = req.headers['x-idempotency-key'] || body.idempotency_key || null;
 
-      const result = engine.evaluate(body, parameterQuestions);
-
-      // Store in memory & history
-      evaluationStore.set(result.evaluation_id, {
-        eligible_partners: result.eligible_nbfcs.map(n => (n.partner_id || n.nbfc_code).toLowerCase()),
-        evaluated_at: result.timestamp,
-        applicant: result.applicant_summary
-      });
-
-      evaluationHistory.unshift({
-        evaluation_id: result.evaluation_id,
-        timestamp: result.timestamp,
-        applicant_name: body.co_applicant_details?.name || 'Applicant',
-        income: body.employment_details?.monthly_income,
-        relation: body.co_applicant_details?.relation,
-        eligible_count: result.overall_summary.preliminarily_eligible_count,
-        top_suggestion: result.recommendation?.recommended_nbfc || 'None'
-      });
-
-      if (evaluationHistory.length > 50) evaluationHistory.pop();
+      const result = engine.evaluate(body, parameterQuestions, { idempotencyKey });
 
       return sendJSON(res, 200, result);
     }
 
     // -------------------------------------------------------------
-    // API: EVALUATION HISTORY
+    // API: EVALUATION HISTORY (PERSISTENT FROM SQLITE)
     // -------------------------------------------------------------
     if (req.method === 'GET' && pathname === '/api/v1/evaluations/history') {
-      return sendJSON(res, 200, { history: evaluationHistory });
+      const rows = db.getRecentEvaluations(50);
+      const formatted = rows.map(r => ({
+        evaluation_id: r.id,
+        timestamp: r.created_at,
+        salesforce_id: r.salesforce_id,
+        user_applicant_id: r.user_applicant_id,
+        eligible_count: r.eligible_count,
+        conditional_count: r.conditional_count,
+        ineligible_count: r.ineligible_count,
+        decision_type: r.decision_type,
+        selected_lender: r.selected_lender,
+        salesforce_sync_status: r.salesforce_sync_status
+      }));
+
+      return sendJSON(res, 200, { history: formatted });
     }
 
     // -------------------------------------------------------------
-    // API: SELECTION CALLBACK
+    // API: GET SINGLE EVALUATION DETAIL
+    // -------------------------------------------------------------
+    if (req.method === 'GET' && pathname.match(/^\/api\/v1\/evaluations\/([^/]+)$/)) {
+      const evaluationId = pathname.split('/')[4];
+      const evaluation = db.getEvaluationById(evaluationId);
+      if (!evaluation) {
+        return sendJSON(res, 404, { error: 'Evaluation session not found' });
+      }
+      return sendJSON(res, 200, evaluation);
+    }
+
+    // -------------------------------------------------------------
+    // API: SELECTION CALLBACK WITH REAL/VERIFIED SYNC
     // -------------------------------------------------------------
     if (req.method === 'POST' && pathname.match(/^\/api\/v1\/eligibility\/([^/]+)\/select$/)) {
       const evaluationId = pathname.split('/')[4];
       const body = await parseBody(req);
       const selectedId = (body.selected_nbfc_id || '').toLowerCase();
+      const idempotencyKey = req.headers['x-idempotency-key'] || body.idempotency_key || null;
 
-      const session = evaluationStore.get(evaluationId);
-      if (!session) {
+      // 1. Fetch persisted evaluation from SQLite
+      const evaluation = db.getEvaluationById(evaluationId);
+      if (!evaluation) {
         return sendJSON(res, 404, {
           error: 'Evaluation session not found or expired',
-          code: 'SESSION_EXPIRED'
+          code: 'SESSION_NOT_FOUND'
         });
       }
 
-      if (!session.eligible_partners.includes(selectedId)) {
+      // 2. Perform synchronized callback using SalesforceSyncService
+      const syncResult = await sfSyncService.syncSelection(evaluation, selectedId, { idempotencyKey });
+
+      if (!syncResult.success && syncResult.sync_status === 'SELECTION_REJECTED') {
         return sendJSON(res, 400, {
-          error: 'Invalid selection',
+          error: 'Invalid lender selection',
           code: 'UNQUALIFIED_SELECTION',
-          message: `NBFC '${selectedId}' was not eligible for this applicant`
+          message: syncResult.error,
+          details: syncResult.details
         });
       }
 
-      // In real scenario, fire webhook to Salesforce
-      const syncResult = {
-        status: 'SYNCED',
-        salesforce_lead_id: body.lead_id || '00Q5g00000abc123',
-        selected_nbfc: selectedId,
-        synced_at: new Date().toISOString()
-      };
+      // 3. Update evaluation in SQLite
+      db.updateSelection(evaluationId, selectedId, syncResult.sync_status, syncResult);
 
       return sendJSON(res, 200, {
         status: 'SUCCESS',
