@@ -151,6 +151,7 @@ function normalizeApplicant(payload = {}, parameterQuestions = null) {
 
   // 8. Bank (In this sheet, bank is unspecified or defaults to generic unless provided)
   const rawBank =
+    payload["Co-Applicant's Bank Name"] ||
     payload['Co-Applicant Bank Name'] ||
     payload.Co_Applicant_s_Bank_Name_PRE__c ||
     bank.bank_name ||
