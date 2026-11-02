@@ -1,9 +1,19 @@
 /**
- * 3-Valued Bank Policy Evaluator
+ * 4-Valued Bank Policy Evaluator v2.2
  * Evaluates bank classification (PSU, Private, RRB, Co-op, Other) against lender acceptance criteria.
+ *
+ * Distinguishes:
+ * - Public Sector / Nationalised Banks (PSU) -> universally accepted
+ * - Scheduled Commercial Private Banks (HDFC, ICICI, Axis, Kotak, Federal, etc.) -> accepted by standard retail lenders
+ * - Regional Rural Banks (RRB / Grameen) -> accepted by lenders supporting UPI / physical NACH (Bajaj, Fibe)
+ * - Co-operative Banks (Co-op) -> restricted by institutional lenders
+ * - Unlisted / OTHER -> routes to CONDITIONAL bank verification rather than automatic hard failure
  */
 
-function evaluateBank(classifiedBank, lenderCriteria) {
+function evaluateBank(classifiedBank, lenderCriteria = {}) {
+  const privateBankAccepted = lenderCriteria.private_bank_accepted !== false;
+  const cooperativeAccepted = lenderCriteria.cooperative_bank_accepted === true;
+  const rrbAccepted = lenderCriteria.rrb_accepted !== undefined ? lenderCriteria.rrb_accepted : true;
   const nonNationalisedAccepted = lenderCriteria.non_nationalised_bank_accepted !== false;
 
   // 1. Bank is completely missing/unspecified (null / empty)
@@ -12,8 +22,8 @@ function evaluateBank(classifiedBank, lenderCriteria) {
       return {
         status: 'UNKNOWN',
         reason_code: 'BANK_VERIFICATION_REQUIRED',
-        detail: 'Lender mandates a nationalised public sector bank account. Bank details must be verified.',
-        missing_requirement: 'Nationalised bank account details'
+        detail: 'Lender mandates account verification. Bank details must be verified.',
+        missing_requirement: 'Bank account details'
       };
     }
     return {
@@ -22,43 +32,109 @@ function evaluateBank(classifiedBank, lenderCriteria) {
     };
   }
 
-  // 2. Bank is 'OTHER'
+  // 2. Bank is 'OTHER' or Unlisted
   if (classifiedBank.code === 'OTHER' || classifiedBank.category === 'UNKNOWN') {
-    if (!nonNationalisedAccepted) {
-      // Lender requires nationalised bank, but applicant provided non-nationalised / OTHER bank
+    if (nonNationalisedAccepted) {
       return {
-        status: 'FAIL',
-        reason_code: 'NON_NATIONALISED_BANK_NOT_ACCEPTED',
-        detail: `Non-nationalised/Co-operative bank '${classifiedBank.raw}' not accepted by this lender`,
+        status: 'PASS',
+        matched: `Bank '${classifiedBank.raw}' accepted under open bank policy`,
         bank_name: classifiedBank.raw
       };
     }
-    // Lender accepts other / non-nationalised banks
+    // For lenders with specific bank restrictions, unlisted bank requires verification (CONDITIONAL, not hard FAIL)
     return {
-      status: 'PASS',
-      matched: `Bank '${classifiedBank.raw}' accepted under non-nationalised bank policy`,
+      status: 'UNKNOWN',
+      reason_code: 'BANK_VERIFICATION_REQUIRED',
+      detail: `Bank account '${classifiedBank.raw}' requires bank statement & mandate verification with lender.`,
+      missing_requirement: `Bank statement & NACH verification for '${classifiedBank.raw}'`,
       bank_name: classifiedBank.raw
     };
   }
 
-  // 3. Bank is specifically classified (PSU vs Private vs RRB vs Co-operative)
-  const isNationalised = classifiedBank.is_nationalised === true || classifiedBank.category === 'PUBLIC_SECTOR';
+  const category = classifiedBank.category;
 
-  if (!nonNationalisedAccepted && !isNationalised) {
+  // 3. Public Sector / Nationalised Banks -> Always PASS
+  if (category === 'PUBLIC_SECTOR' || classifiedBank.is_nationalised === true) {
+    return {
+      status: 'PASS',
+      matched: `Public sector bank '${classifiedBank.name}' is accepted`,
+      bank_name: classifiedBank.name,
+      bank_category: category
+    };
+  }
+
+  // 4. Scheduled Commercial Private Banks (HDFC, ICICI, Axis, Kotak, Federal, etc.)
+  if (category === 'PRIVATE_SECTOR') {
+    if (privateBankAccepted) {
+      return {
+        status: 'PASS',
+        matched: `Scheduled commercial private bank '${classifiedBank.name}' is accepted`,
+        bank_name: classifiedBank.name,
+        bank_category: category
+      };
+    }
     return {
       status: 'FAIL',
-      reason_code: 'NON_NATIONALISED_BANK_NOT_ACCEPTED',
-      detail: `Non-nationalised/Co-operative bank '${classifiedBank.name}' not accepted by this lender`,
+      reason_code: 'PRIVATE_BANK_NOT_ACCEPTED',
+      detail: `Private sector bank '${classifiedBank.name}' is not accepted by this lender.`,
       bank_name: classifiedBank.name,
-      bank_category: classifiedBank.category
+      bank_category: category
+    };
+  }
+
+  // 5. Regional Rural Banks (RRB / Grameen)
+  if (category === 'REGIONAL_RURAL') {
+    if (rrbAccepted === true) {
+      return {
+        status: 'PASS',
+        matched: `Regional rural bank '${classifiedBank.name}' accepted via UPI / Grameen mandate`,
+        bank_name: classifiedBank.name,
+        bank_category: category
+      };
+    } else if (rrbAccepted === false) {
+      return {
+        status: 'FAIL',
+        reason_code: 'REGIONAL_RURAL_BANK_NOT_ACCEPTED',
+        detail: `Regional rural bank '${classifiedBank.name}' is not accepted by this lender.`,
+        bank_name: classifiedBank.name,
+        bank_category: category
+      };
+    } else {
+      return {
+        status: 'UNKNOWN',
+        reason_code: 'RRB_MANDATE_VERIFICATION_REQUIRED',
+        detail: `Regional rural bank '${classifiedBank.name}' requires verification of branch NACH / UPI feasibility.`,
+        missing_requirement: `Branch NACH verification for ${classifiedBank.name}`,
+        bank_name: classifiedBank.name,
+        bank_category: category
+      };
+    }
+  }
+
+  // 6. Co-operative Banks (Co-op)
+  if (category === 'COOPERATIVE') {
+    if (cooperativeAccepted) {
+      return {
+        status: 'PASS',
+        matched: `Co-operative bank '${classifiedBank.name}' accepted under exception policy`,
+        bank_name: classifiedBank.name,
+        bank_category: category
+      };
+    }
+    return {
+      status: 'FAIL',
+      reason_code: 'COOPERATIVE_BANK_NOT_ACCEPTED',
+      detail: `Co-operative bank '${classifiedBank.name}' is not accepted by this lender.`,
+      bank_name: classifiedBank.name,
+      bank_category: category
     };
   }
 
   return {
     status: 'PASS',
-    matched: `Bank '${classifiedBank.name}' (${classifiedBank.category}) accepted by lender policy`,
+    matched: `Bank '${classifiedBank.name}' accepted by lender policy`,
     bank_name: classifiedBank.name,
-    bank_category: classifiedBank.category
+    bank_category: category
   };
 }
 

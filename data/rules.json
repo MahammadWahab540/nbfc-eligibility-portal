@@ -1,7 +1,7 @@
 {
-  "version": "2.1.0",
+  "version": "2.2.0",
   "effective_date": "2026-11-02",
-  "last_updated": "2026-11-02T14:10:00.000Z",
+  "last_updated": "2026-11-02T16:15:00.000Z",
   "partners": [
     {
       "id": "northern_arc",
@@ -41,6 +41,8 @@
         "dob_mismatch_allowed": true,
         "name_mismatch_allowed": false,
         "non_nationalised_bank_accepted": true,
+        "private_bank_accepted": true,
+        "cooperative_bank_accepted": false,
         "door_number_mandatory": false
       }
     },
@@ -50,8 +52,9 @@
       "name": "Bajaj Finserv",
       "is_active": true,
       "priority": 2,
-      "description": "Institutional retail lender. High CIBIL cutoff (>720), higher age allowance (up to 65 yrs).",
+      "description": "Institutional retail lender. High CIBIL cutoff (>720), higher age allowance (up to 65 yrs). Accepts PSU & Scheduled Commercial Private banks.",
       "discrepancy_status": "ALIGNED",
+      "discrepancy_notes": "Clarified bank policy: Bajaj accepts Scheduled Commercial Private Banks (HDFC, ICICI, Axis, Kotak, Federal) and RRBs with UPI mandate. Rejects Unscheduled Co-operative Banks.",
       "criteria": {
         "cibil_min": 721,
         "monthly_income_min": 15000,
@@ -81,6 +84,9 @@
         "dob_mismatch_allowed": false,
         "name_mismatch_allowed": false,
         "non_nationalised_bank_accepted": false,
+        "private_bank_accepted": true,
+        "cooperative_bank_accepted": false,
+        "rrb_accepted": true,
         "door_number_mandatory": false
       }
     },
@@ -90,7 +96,7 @@
       "name": "Auxilo",
       "is_active": true,
       "priority": 3,
-      "description": "Education NBFC allowing legal guardians. Prime income ₹25,000, conditional review floor ₹15,000.",
+      "description": "Education NBFC allowing legal guardians. Prime income ₹25,000, conditional review floor ₹15,000. Accepts PSU & Scheduled Private banks.",
       "discrepancy_status": "ALIGNED",
       "criteria": {
         "cibil_min": 651,
@@ -131,6 +137,9 @@
         "dob_mismatch_allowed": false,
         "name_mismatch_allowed": false,
         "non_nationalised_bank_accepted": false,
+        "private_bank_accepted": true,
+        "cooperative_bank_accepted": false,
+        "rrb_accepted": false,
         "door_number_mandatory": false
       }
     },
@@ -176,6 +185,9 @@
         "dob_mismatch_allowed": true,
         "name_mismatch_allowed": true,
         "non_nationalised_bank_accepted": true,
+        "private_bank_accepted": true,
+        "cooperative_bank_accepted": false,
+        "rrb_accepted": true,
         "door_number_mandatory": false
       }
     },
@@ -239,6 +251,8 @@
         "dob_mismatch_allowed": false,
         "name_mismatch_allowed": false,
         "non_nationalised_bank_accepted": true,
+        "private_bank_accepted": true,
+        "cooperative_bank_accepted": false,
         "door_number_mandatory": false
       }
     },
@@ -282,7 +296,36 @@
         "dob_mismatch_allowed": false,
         "name_mismatch_allowed": false,
         "non_nationalised_bank_accepted": true,
+        "private_bank_accepted": true,
+        "cooperative_bank_accepted": false,
         "door_number_mandatory": true
+      }
+    }
+  ],
+  "evaluated_external_partners": [
+    {
+      "id": "feemonk",
+      "name": "Feemonk",
+      "status": "ASSESSED_PENDING_API_INTEGRATION",
+      "historical_disbursement_count": 384,
+      "inferred_criteria": {
+        "cibil_min": 650,
+        "allows_ntc": true,
+        "monthly_income_min": 15000,
+        "allowed_relations": ["Mother", "Father", "Sibling", "Any relative"],
+        "accepts_unlinked_pan_aadhaar": true,
+        "accepts_new_bank_accounts": true
+      }
+    },
+    {
+      "id": "jodo_flex",
+      "name": "Jodo Flex",
+      "status": "ASSESSED_PENDING_API_INTEGRATION",
+      "historical_disbursement_count": 3,
+      "inferred_criteria": {
+        "cibil_min": 650,
+        "monthly_income_min": 15000,
+        "speciality": "Flexible underwriting for complex banking / Grameen accounts"
       }
     }
   ]

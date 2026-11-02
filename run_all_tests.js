@@ -7,6 +7,7 @@ const testSuites = [
   'test/unit/income_age.test.js',
   'test/unit/region.test.js',
   'test/unit/identity.test.js',
+  'test/unit/reconciliation.test.js',
   'test/boundary/thresholds.test.js',
   'test/synthetic/edge_cases_100.test.js',
   'test/integration/salesforce_sync.test.js',
