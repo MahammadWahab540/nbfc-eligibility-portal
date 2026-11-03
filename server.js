@@ -85,6 +85,10 @@ const server = http.createServer(async (req, res) => {
       if (pathname === '/styles.css') {
         return serveStaticFile(res, path.join(__dirname, 'public', 'styles.css'), 'text/css');
       }
+      if (pathname === '/favicon.ico') {
+        res.writeHead(204);
+        return res.end();
+      }
     }
 
     // -------------------------------------------------------------

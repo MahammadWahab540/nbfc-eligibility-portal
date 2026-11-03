@@ -993,7 +993,8 @@ document.getElementById('settings-form')?.addEventListener('submit', async (e) =
 async function loadAuditLogs() {
   try {
     const res = await fetch('/api/v1/audit');
-    const logs = await res.json();
+    const data = await res.json();
+    const logs = Array.isArray(data) ? data : (data.logs || []);
     const tbody = document.getElementById('audit-logs-tbody');
     if (!tbody) return;
 
