@@ -123,9 +123,15 @@
           <h2 class="text-lg font-bold text-slate-900 tracking-tight">Lending Partners & Priority Sequence</h2>
           <p class="text-xs text-slate-500">When a student applies, lenders are evaluated and offered in this priority order. Drag cards or use the arrows to adjust routing.</p>
         </div>
-        <div class="text-xs text-slate-600 font-medium flex items-center space-x-1.5 bg-white px-3.5 py-1.5 rounded-full border border-slate-200/80 shadow-xs">
-          <span class="text-blue-600 font-bold">Tip:</span>
-          <span>Higher priority lenders get first choice on qualified students</span>
+        <div class="flex flex-wrap items-center gap-2.5">
+          <button id="btn-open-add-partner-modal" class="apple-btn-primary text-xs flex items-center space-x-1.5 shadow-sm">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            <span>+ Add NBFC Partner</span>
+          </button>
+          <div class="text-xs text-slate-600 font-medium flex items-center space-x-1.5 bg-white px-3.5 py-1.5 rounded-full border border-slate-200/80 shadow-xs">
+            <span class="text-blue-600 font-bold">Tip:</span>
+            <span>Higher priority lenders get first choice on qualified students</span>
+          </div>
         </div>
       </div>
 
@@ -755,6 +761,146 @@
         <div class="pt-3 border-t border-slate-100 flex items-center justify-end space-x-2.5">
           <button type="button" id="btn-cancel-modal" class="apple-btn-secondary">Cancel</button>
           <button type="submit" class="apple-btn-primary">Save Guidelines</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- APPLE MODAL: ONBOARD NEW NBFC LENDING PARTNER -->
+  <!-- ================================================================= -->
+  <div id="modal-add-partner" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-black/[0.08] overflow-hidden fade-in">
+      
+      <!-- Modal Header -->
+      <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-blue-50/60">
+        <div class="flex items-center space-x-3">
+          <div class="w-9 h-9 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900 tracking-tight">Onboard New Lending Partner</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Configure lending guidelines, credit score cutoffs, and policy rules.</p>
+          </div>
+        </div>
+        <button id="btn-close-add-partner-modal" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-full hover:bg-slate-200/60 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Modal Body (Form) -->
+      <form id="add-partner-form" class="p-6 overflow-y-auto space-y-4 text-xs">
+        
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Partner / NBFC Name <span class="text-red-500">*</span></label>
+            <input type="text" id="add-partner-name" class="apple-input font-medium" placeholder="e.g. InCred Financial" required>
+            <span class="text-[10px] text-slate-400">Official lender brand name</span>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">NBFC Code / ID</label>
+            <input type="text" id="add-partner-code" class="apple-input font-mono font-medium" placeholder="e.g. INCRED">
+            <span class="text-[10px] text-slate-400">Auto-generated if left empty</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Priority Rank</label>
+            <input type="number" id="add-partner-priority" class="apple-input font-medium" placeholder="Auto">
+            <span class="text-[10px] text-slate-400">Sequence in routing</span>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Minimum CIBIL</label>
+            <input type="number" id="add-partner-cibil" class="apple-input font-medium" value="650" required>
+            <span class="text-[10px] text-slate-400">e.g. 650 or 680</span>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Min Income (₹)</label>
+            <input type="number" id="add-partner-income" class="apple-input font-medium" value="18000" required>
+            <span class="text-[10px] text-slate-400">Standard monthly floor</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Max Co-Applicant Age</label>
+            <input type="number" id="add-partner-age" class="apple-input font-medium" value="58" required>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Product Description</label>
+            <input type="text" id="add-partner-desc" class="apple-input font-medium" placeholder="e.g. Education loan partner with flexible approval">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1.5">Permitted Family Relationships</label>
+          <div id="add-partner-relations-tags" class="flex flex-wrap gap-1.5">
+            <!-- Rendered as interactive pills -->
+          </div>
+          <input type="hidden" id="add-partner-relations">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1.5">Excluded Occupations (Negative List)</label>
+          <div id="add-partner-occupations-tags" class="flex flex-wrap gap-1.5">
+            <!-- Rendered as interactive pills -->
+          </div>
+          <input type="hidden" id="add-partner-occupations">
+        </div>
+
+        <!-- Verification Checklist -->
+        <div class="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 space-y-2.5">
+          <div class="font-bold text-slate-800 text-[11px] uppercase tracking-wider">Verification Requirements</div>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-700">
+            <label class="flex items-center space-x-2 cursor-pointer select-none">
+              <input type="checkbox" id="add-partner-pan-linked" class="apple-checkbox">
+              <span>PAN & Aadhaar must be linked</span>
+            </label>
+
+            <label class="flex items-center space-x-2 cursor-pointer select-none">
+              <input type="checkbox" id="add-partner-pan-avail" class="apple-checkbox">
+              <span>Original PAN card required</span>
+            </label>
+
+            <label class="flex items-center space-x-2 cursor-pointer select-none">
+              <input type="checkbox" id="add-partner-coop-bank" class="apple-checkbox">
+              <span>Accept Co-op / Rural Bank</span>
+            </label>
+
+            <label class="flex items-center space-x-2 cursor-pointer select-none">
+              <input type="checkbox" id="add-partner-door-num" class="apple-checkbox">
+              <span>Street / Door number mandatory</span>
+            </label>
+
+            <label class="flex items-center space-x-2 cursor-pointer select-none">
+              <input type="checkbox" id="add-partner-dob-mismatch" class="apple-checkbox" checked>
+              <span>Allow Birth Date Mismatch</span>
+            </label>
+
+            <label class="flex items-center space-x-2 cursor-pointer select-none">
+              <input type="checkbox" id="add-partner-name-mismatch" class="apple-checkbox">
+              <span>Allow Name Mismatch</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Restricted States / Regions</label>
+          <input type="text" id="add-partner-regions" class="apple-input" placeholder="e.g. J&K, Nagaland, Tripura">
+          <span class="text-[10px] text-slate-400">Comma-separated regions where loans cannot be disbursed</span>
+        </div>
+
+        <!-- Modal Footer Buttons -->
+        <div class="pt-3 border-t border-slate-100 flex items-center justify-end space-x-2.5">
+          <button type="button" id="btn-cancel-add-partner-modal" class="apple-btn-secondary">Cancel</button>
+          <button type="submit" id="btn-submit-add-partner" class="apple-btn-primary">Create Lending Partner</button>
         </div>
 
       </form>

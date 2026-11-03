@@ -490,6 +490,109 @@ document.getElementById('edit-partner-form')?.addEventListener('submit', async (
 });
 
 // ---------------------------------------------------------------------------
+// ONBOARD NEW NBFC LENDING PARTNER
+// ---------------------------------------------------------------------------
+function openAddPartnerModal() {
+  const modal = document.getElementById('modal-add-partner');
+  if (!modal) return;
+
+  document.getElementById('add-partner-form')?.reset();
+  const nextPriority = (currentPartners.length || 0) + 1;
+  const priorityInput = document.getElementById('add-partner-priority');
+  if (priorityInput) priorityInput.value = nextPriority;
+
+  // Render relation tags with default selections
+  const defaultRelations = ["Mother", "Father", "Spouse", "Sibling", "Grandfather", "Any relative", "Blood relation"];
+  const relContainer = document.getElementById('add-partner-relations-tags');
+  if (relContainer) {
+    relContainer.innerHTML = AVAILABLE_RELATIONS.map(rel => {
+      const isSelected = defaultRelations.some(dr => dr.toLowerCase() === rel.toLowerCase());
+      return `
+        <span class="tag-pill ${isSelected ? 'active' : ''}" data-rel="${rel}" onclick="toggleTagPill(this, 'add-partner-relations')">
+          ${rel}
+        </span>
+      `;
+    }).join('');
+    updateHiddenTagValue('add-partner-relations-tags', 'add-partner-relations', 'data-rel');
+  }
+
+  // Render occupation tags with default exclusions
+  const defaultOccs = ["POLITICIAN", "FREELANCER"];
+  const occContainer = document.getElementById('add-partner-occupations-tags');
+  if (occContainer) {
+    occContainer.innerHTML = AVAILABLE_OCCUPATIONS.map(occ => {
+      const isSelected = defaultOccs.includes(occ.id);
+      return `
+        <span class="tag-pill tag-pill-danger ${isSelected ? 'active' : ''}" data-occ="${occ.id}" onclick="toggleTagPill(this, 'add-partner-occupations')">
+          ${occ.label}
+        </span>
+      `;
+    }).join('');
+    updateHiddenTagValue('add-partner-occupations-tags', 'add-partner-occupations', 'data-occ');
+  }
+
+  modal.classList.remove('hidden');
+}
+
+function closeAddPartnerModal() {
+  const modal = document.getElementById('modal-add-partner');
+  if (modal) modal.classList.add('hidden');
+}
+
+document.getElementById('btn-open-add-partner-modal')?.addEventListener('click', openAddPartnerModal);
+document.getElementById('btn-close-add-partner-modal')?.addEventListener('click', closeAddPartnerModal);
+document.getElementById('btn-cancel-add-partner-modal')?.addEventListener('click', closeAddPartnerModal);
+
+document.getElementById('add-partner-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = document.getElementById('add-partner-name').value.trim();
+  const code = document.getElementById('add-partner-code').value.trim();
+  const priority = document.getElementById('add-partner-priority').value;
+  const desc = document.getElementById('add-partner-desc').value.trim();
+
+  const rawRelations = document.getElementById('add-partner-relations').value;
+  const rawOccs = document.getElementById('add-partner-occupations').value;
+  const rawRegions = document.getElementById('add-partner-regions').value;
+
+  const partnerPayload = {
+    name: name,
+    code: code || undefined,
+    priority: priority ? parseInt(priority, 10) : undefined,
+    description: desc || undefined,
+    criteria: {
+      cibil_min: parseInt(document.getElementById('add-partner-cibil').value, 10),
+      monthly_income_min: parseFloat(document.getElementById('add-partner-income').value),
+      age_max: parseInt(document.getElementById('add-partner-age').value, 10),
+      allowed_relations: rawRelations.split(',').map(s => s.trim()).filter(Boolean),
+      rejected_occupations: rawOccs.split(',').map(s => s.trim().toUpperCase()).filter(Boolean),
+      pan_aadhaar_linked_mandatory: document.getElementById('add-partner-pan-linked').checked,
+      pan_card_mandatory: document.getElementById('add-partner-pan-avail').checked,
+      non_nationalised_bank_accepted: document.getElementById('add-partner-coop-bank').checked,
+      dob_mismatch_allowed: document.getElementById('add-partner-dob-mismatch').checked,
+      name_mismatch_allowed: document.getElementById('add-partner-name-mismatch').checked,
+      door_number_mandatory: document.getElementById('add-partner-door-num').checked,
+      rejected_regions: rawRegions.split(',').map(s => s.trim()).filter(Boolean)
+    }
+  };
+
+  try {
+    const res = await fetch('/api/v1/partners', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(partnerPayload)
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error || 'Failed to create partner');
+
+    closeAddPartnerModal();
+    showAppleToast(`NBFC Partner ${name} added successfully!`);
+    loadPartners();
+  } catch (err) {
+    alert('Failed to add NBFC partner: ' + err.message);
+  }
+});
+
+// ---------------------------------------------------------------------------
 // 3. APPLICANT ELIGIBILITY CHECKER (SIMULATOR)
 // ---------------------------------------------------------------------------
 function initSimulator() {

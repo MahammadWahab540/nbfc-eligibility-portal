@@ -115,6 +115,85 @@ const server = http.createServer(async (req, res) => {
     }
 
     // -------------------------------------------------------------
+    // API: CREATE NEW NBFC LENDING PARTNER (ADMIN AUTH PROTECTED)
+    // -------------------------------------------------------------
+    if (req.method === 'POST' && pathname === '/api/v1/partners') {
+      if (!checkAdminAuth(req)) {
+        return sendJSON(res, 401, { error: 'Unauthorized', message: 'Valid Admin Bearer token required' });
+      }
+
+      const body = await parseBody(req);
+      if (!body.name || !body.name.trim()) {
+        return sendJSON(res, 400, { error: 'Partner name is required' });
+      }
+
+      engine.loadData();
+      const rawId = (body.id || body.code || body.name).toLowerCase().replace(/[^a-z0-9]/g, '_');
+      const partnerId = rawId.replace(/^_+|_+$/g, '');
+      const code = (body.code || partnerId).toUpperCase();
+
+      const existing = engine.ruleSet.partners.find(p => p.id === partnerId || p.code === code);
+      if (existing) {
+        return sendJSON(res, 409, { error: `Partner with identifier '${partnerId}' or code '${code}' already exists.` });
+      }
+
+      const nextPriority = body.priority ? parseInt(body.priority, 10) : (engine.ruleSet.partners.length + 1);
+
+      const newPartner = {
+        id: partnerId,
+        code: code,
+        name: body.name.trim(),
+        is_active: body.is_active !== undefined ? Boolean(body.is_active) : true,
+        priority: nextPriority,
+        description: body.description || `${body.name.trim()} NBFC Lending Partner`,
+        discrepancy_status: 'ALIGNED',
+        discrepancy_notes: 'Newly added lending partner configured via Partner Portal.',
+        criteria: {
+          cibil_min: body.criteria?.cibil_min !== undefined ? parseInt(body.criteria.cibil_min, 10) : 650,
+          monthly_income_min: body.criteria?.monthly_income_min !== undefined ? parseFloat(body.criteria.monthly_income_min) : 18000,
+          monthly_income_hard_min: body.criteria?.monthly_income_hard_min !== undefined ? parseFloat(body.criteria.monthly_income_hard_min) : 18000,
+          age_min: body.criteria?.age_min !== undefined ? parseInt(body.criteria.age_min, 10) : 21,
+          age_max: body.criteria?.age_max !== undefined ? parseInt(body.criteria.age_max, 10) : 58,
+          age_max_with_exception: body.criteria?.age_max_with_exception !== undefined ? parseInt(body.criteria.age_max_with_exception, 10) : 65,
+          allowed_relations: Array.isArray(body.criteria?.allowed_relations) && body.criteria.allowed_relations.length > 0
+            ? body.criteria.allowed_relations
+            : ["Mother", "Father", "Spouse", "Sibling", "Grandfather", "Any relative", "Blood relation"],
+          rejected_occupations: Array.isArray(body.criteria?.rejected_occupations)
+            ? body.criteria.rejected_occupations
+            : ["POLITICIAN", "FREELANCER"],
+          rejected_regions: Array.isArray(body.criteria?.rejected_regions)
+            ? body.criteria.rejected_regions
+            : [],
+          pan_aadhaar_linked_mandatory: Boolean(body.criteria?.pan_aadhaar_linked_mandatory),
+          pan_card_mandatory: Boolean(body.criteria?.pan_card_mandatory),
+          dob_mismatch_allowed: body.criteria?.dob_mismatch_allowed !== undefined ? Boolean(body.criteria.dob_mismatch_allowed) : true,
+          name_mismatch_allowed: Boolean(body.criteria?.name_mismatch_allowed),
+          non_nationalised_bank_accepted: body.criteria?.non_nationalised_bank_accepted !== undefined ? Boolean(body.criteria.non_nationalised_bank_accepted) : true,
+          private_bank_accepted: body.criteria?.private_bank_accepted !== undefined ? Boolean(body.criteria.private_bank_accepted) : true,
+          cooperative_bank_accepted: Boolean(body.criteria?.cooperative_bank_accepted),
+          door_number_mandatory: Boolean(body.criteria?.door_number_mandatory)
+        },
+        policy_owner: body.policy_owner || "Credit Underwriting Committee",
+        approval_reference: body.approval_reference || `NBFC-ONBOARD-${Date.now().toString().slice(-6)}`,
+        effective_date: new Date().toISOString().slice(0, 10)
+      };
+
+      engine.ruleSet.partners.push(newPartner);
+
+      const vParts = (engine.ruleSet.version || '2.3.0').split('.');
+      vParts[2] = parseInt(vParts[2] || '0', 10) + 1;
+      engine.ruleSet.version = vParts.join('.');
+
+      engine.saveRules(engine.ruleSet, body.user || 'Risk Operations Manager', `Onboarded new lending partner ${newPartner.name}`);
+
+      return sendJSON(res, 201, {
+        message: `Lending partner ${newPartner.name} created successfully`,
+        partner: newPartner,
+        version: engine.ruleSet.version
+      });
+    }
+
+    // -------------------------------------------------------------
     // API: UPDATE SINGLE PARTNER CRITERIA (ADMIN AUTH PROTECTED)
     // -------------------------------------------------------------
     if (req.method === 'PUT' && pathname.match(/^\/api\/v1\/partners\/([^/]+)$/)) {
