@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NBFC Partner Portal · Credit Policies & Prioritisation</title>
+  <title>NxtWave NBFC Portal · Credit Policies & Prioritisation</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -21,14 +21,15 @@
       
       <!-- Brand & Product Identity -->
       <div class="flex items-center space-x-3.5">
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-slate-900 to-slate-700 flex items-center justify-center text-white shadow-sm ring-1 ring-black/5">
-          <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#0052FF] via-[#0066FF] to-[#00D2FF] flex items-center justify-center text-white shadow-md shadow-blue-500/25 ring-1 ring-white/20">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 18V6.5C4 5.67 4.67 5 5.5 5H6.5L14 15.5V6.5C14 5.67 14.67 5 15.5 5H16.5C17.33 5 18 5.67 18 6.5V17.5C18 18.33 17.33 19 16.5 19H15.5L8 8.5V17.5C8 18.33 7.33 19 6.5 19H5.5C4.67 19 4 18.33 4 17.5V18Z" fill="white"/>
+            <circle cx="19.5" cy="6.5" r="1.5" fill="#67E8F9"/>
           </svg>
         </div>
         <div>
           <div class="flex items-center space-x-2">
-            <span class="text-sm font-bold tracking-tight text-slate-900">NBFC Partner Portal</span>
+            <span class="text-sm font-bold tracking-tight text-slate-900">NxtWave NBFC Portal</span>
             <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-blue-50 text-blue-700 border border-blue-200/60">Education Loans</span>
           </div>
           <p class="text-[11px] text-slate-500 font-normal">Credit policy rules, lender prioritization & applicant matching</p>
@@ -249,7 +250,7 @@
               </label>
 
               <label class="flex items-center justify-between text-xs cursor-pointer select-none">
-                <span class="text-slate-700 font-medium">Original PAN card available (Physical or e-PAN)</span>
+                <span class="text-slate-700 font-medium">Physical / Original PAN card available</span>
                 <input type="checkbox" id="sim-q-pan-avail" checked class="apple-checkbox">
               </label>
 
@@ -483,7 +484,7 @@
           <div class="grid grid-cols-3 gap-2" id="program-selector-group">
             <button class="payload-program-btn active-segment py-2 px-3 rounded-xl border text-xs font-bold transition-all text-center" data-program="genies">
               <div class="text-[11px]">Genies</div>
-              <div class="text-[9px] opacity-70 font-normal">Entry Tier</div>
+              <div class="text-[9px] opacity-70 font-normal">Elite Program</div>
             </button>
             <button class="payload-program-btn py-2 px-3 rounded-xl border border-slate-200 text-xs font-bold transition-all text-slate-600 hover:bg-slate-50 text-center" data-program="smart">
               <div class="text-[11px]">Smart</div>
@@ -491,7 +492,7 @@
             </button>
             <button class="payload-program-btn py-2 px-3 rounded-xl border border-slate-200 text-xs font-bold transition-all text-slate-600 hover:bg-slate-50 text-center" data-program="edge">
               <div class="text-[11px]">Edge</div>
-              <div class="text-[9px] opacity-70 font-normal">Premium Tier</div>
+              <div class="text-[9px] opacity-70 font-normal">Entry Level</div>
             </button>
           </div>
         </div>
@@ -727,7 +728,7 @@
 
             <label class="flex items-center space-x-2 cursor-pointer select-none">
               <input type="checkbox" id="edit-pan-avail" class="apple-checkbox">
-              <span>Original PAN card required</span>
+              <span>Physical / Original PAN card required</span>
             </label>
 
             <label class="flex items-center space-x-2 cursor-pointer select-none">

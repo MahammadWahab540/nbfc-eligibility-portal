@@ -31,9 +31,13 @@ function evaluateLender(applicant, partnerConfig, policyMetadata = {}) {
   const pendingVerifications = [];
 
   const discrepancies = getDiscrepancies(partnerId);
+  const effectivePolicy = {
+    ...(partnerConfig.policy || {}),
+    ...(policyMetadata.settings || {})
+  };
 
   // 1. CIBIL Evaluation
-  const cibilResult = evaluateCibil(applicant.cibil, c, partnerConfig.policy || {}, applicant);
+  const cibilResult = evaluateCibil(applicant.cibil, c, effectivePolicy, applicant);
   rulesEvaluated.push({
     rule_name: 'CIBIL_SCORE',
     status: cibilResult.status,

@@ -1,7 +1,7 @@
 {
   "version": "2.3.0",
   "effective_date": "2026-11-02",
-  "last_updated": "2026-11-02T17:25:00.000Z",
+  "last_updated": "2026-11-18T10:49:26.586Z",
   "partners": [
     {
       "id": "northern_arc",
@@ -14,8 +14,8 @@
       "discrepancy_notes": "Aligned to approved base threshold of ₹15,000 for standard co-applicants as verified by Master Parameter sheet and production disbursements.",
       "criteria": {
         "cibil_min": 651,
-        "monthly_income_min": 15000,
-        "monthly_income_hard_min": 15000,
+        "monthly_income_min": 18000,
+        "monthly_income_hard_min": 18000,
         "age_min": 21,
         "age_max": 58,
         "age_max_with_exception": 65,
@@ -37,13 +37,14 @@
         ],
         "rejected_regions": [],
         "pan_aadhaar_linked_mandatory": false,
-        "pan_card_mandatory": false,
-        "dob_mismatch_allowed": true,
+        "pan_card_mandatory": true,
+        "dob_mismatch_allowed": false,
         "name_mismatch_allowed": false,
         "non_nationalised_bank_accepted": true,
         "private_bank_accepted": true,
         "cooperative_bank_accepted": false,
-        "door_number_mandatory": false
+        "door_number_mandatory": false,
+        "allow_prime_bracket": true
       },
       "policy_owner": "Credit Underwriting Committee",
       "approval_reference": "NBFC-UW-V2.3-20261102",
@@ -232,11 +233,12 @@
       "name": "Gyandhan",
       "is_active": true,
       "priority": 5,
-      "description": "Prime education loan specialist. Prime income ₹25,000, base floor ₹15,000 under conditional verification. Senior co-applicants up to 65 permitted under tenure review.",
+      "description": "Prime education loan specialist. Minimum monthly income ₹15,000 (standard Gyandhan floor; distinct from Avanse ₹25,000). Physical PAN card mandatory.",
       "discrepancy_status": "ALIGNED",
+      "discrepancy_notes": "Aligned to approved Gyandhan base threshold of ₹15,000 (Avanse threshold of ₹25,000 decoupled). Physical PAN is mandatory.",
       "criteria": {
         "cibil_min": 711,
-        "monthly_income_min": 25000,
+        "monthly_income_min": 15000,
         "monthly_income_hard_min": 15000,
         "age_min": 21,
         "age_max": 58,
@@ -307,12 +309,14 @@
         ],
         "pan_aadhaar_linked_mandatory": true,
         "pan_card_mandatory": true,
+        "physical_pan_mandatory": false,
         "dob_mismatch_allowed": false,
         "name_mismatch_allowed": false,
         "non_nationalised_bank_accepted": true,
         "private_bank_accepted": true,
         "cooperative_bank_accepted": false,
-        "door_number_mandatory": false
+        "door_number_mandatory": false,
+        "allow_prime_bracket": true
       },
       "policy_owner": "Credit Underwriting Committee",
       "approval_reference": "NBFC-UW-V2.3-20261102",
@@ -324,12 +328,12 @@
       "name": "Techfino",
       "is_active": true,
       "priority": 6,
-      "description": "Digital lender requiring physical address door number. Prime income ₹25,000, base floor ₹15,000 under conditional verification.",
+      "description": "Digital lender. Minimum monthly income ₹20,000.",
       "discrepancy_status": "ALIGNED",
       "criteria": {
         "cibil_min": 651,
-        "monthly_income_min": 25000,
-        "monthly_income_hard_min": 15000,
+        "monthly_income_min": 20000,
+        "monthly_income_hard_min": 20000,
         "age_min": 21,
         "age_max": 58,
         "age_max_with_exception": 65,
@@ -387,7 +391,8 @@
     {
       "id": "feemonk",
       "name": "Feemonk",
-      "status": "ASSESSED_PENDING_API_INTEGRATION",
+      "status": "MERGED_WITH_FIBE",
+      "notes": "Feemonk and Fibe are the same lending partner; unified under Fibe.",
       "historical_disbursement_count": 384,
       "inferred_criteria": {
         "cibil_min": 650,

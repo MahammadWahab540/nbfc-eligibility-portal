@@ -80,7 +80,8 @@ class NBFCEligibilityEngine {
     for (const partner of activePartners) {
       const result = evaluateLender(applicant, partner, {
         policy_version: this.ruleSet.version || '2.3.0',
-        effective_date: this.ruleSet.effective_date || '2026-11-02'
+        effective_date: this.ruleSet.effective_date || '2026-11-02',
+        settings: this.settings
       });
 
       result.missing_requirements.forEach(req => allMissingInformation.add(req));

@@ -82,7 +82,8 @@ const partnerMetrics = {
   gyandhan: { eligible: 0, conditional: 0, ineligible: 0, reasons: {} },
   auxilo: { eligible: 0, conditional: 0, ineligible: 0, reasons: {} },
   techfino: { eligible: 0, conditional: 0, ineligible: 0, reasons: {} },
-  bajaj: { eligible: 0, conditional: 0, ineligible: 0, reasons: {} }
+  bajaj: { eligible: 0, conditional: 0, ineligible: 0, reasons: {} },
+  feemonk: { eligible: 0, conditional: 0, ineligible: 0, reasons: {} }
 };
 
 let totalEvaluated = 0;

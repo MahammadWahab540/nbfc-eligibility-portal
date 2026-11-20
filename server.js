@@ -382,7 +382,8 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'POST' && pathname.match(/^\/api\/v1\/eligibility\/([^/]+)\/select$/)) {
       const evaluationId = pathname.split('/')[4];
       const body = await parseBody(req);
-      const selectedId = (body.selected_nbfc_id || '').toLowerCase();
+      const rawSelectedId = (body.selected_nbfc_id || '').toLowerCase();
+      const selectedId = rawSelectedId === 'feemonk' ? 'fibe' : rawSelectedId;
       const idempotencyKey = req.headers['x-idempotency-key'] || body.idempotency_key || null;
 
       // 1. Fetch persisted evaluation from SQLite

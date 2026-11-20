@@ -5,23 +5,23 @@ console.log('--- RUNNING CONTRADICTIONS REGRESSION TEST SUITE ---');
 
 const engine = new NBFCEligibilityEngine();
 
-// 1. Northern Arc Income Threshold Fix (15k vs old 18k)
+// 1. Northern Arc Income Threshold Fix (18k)
 const naPayload = {
-  'userId': 'test-na-15k',
+  'userId': 'test-na-18k',
   'Choose NBFC': 'NORTHERN ARC',
   'CIBIL Score Range': '700 - 900',
   'Relation with the Co-Applicant': 'Father',
   'Co applicant Occupation': 'Farmer',
   'Co-Applicant Age': '45',
   'State': 'Tamil Nadu',
-  'Co-Applicant Monthly Income': '15000'
+  'Co-Applicant Monthly Income': '18000'
 };
 const resNA = engine.evaluate(naPayload);
 const naLender = resNA.eligible_nbfcs.find(l => l.partner_id === 'northern_arc');
-assert.ok(naLender, 'Northern Arc must be ELIGIBLE for income ₹15,000');
+assert.ok(naLender, 'Northern Arc must be ELIGIBLE for income ₹18,000');
 assert.strictEqual(naLender.decision_status, 'ELIGIBLE');
 
-// 2. Gyandhan & Techfino Tiered Income Fix (20k in conditional review band)
+// 2. Gyandhan (min ₹15k) & Techfino (min ₹20k) Income Alignment
 const gyaPayload = {
   'userId': 'test-gya-20k',
   'Choose NBFC': 'GYANDHAN',
@@ -33,16 +33,13 @@ const gyaPayload = {
   'Co-Applicant Monthly Income': '20000'
 };
 const resGya = engine.evaluate(gyaPayload);
-const gyaLender = resGya.conditional_nbfcs.find(l => l.partner_id === 'gyandhan');
-assert.ok(gyaLender, 'Gyandhan must be CONDITIONAL (not hard-rejected) for income ₹20,000');
-assert.strictEqual(gyaLender.decision_status, 'CONDITIONAL');
-assert.ok(
-  gyaLender.missing_requirements.some(r => r.toLowerCase().includes('bank statement') || r.toLowerCase().includes('income verification')),
-  'Gyandhan must request bank statement / income verification'
-);
+const gyaLender = resGya.eligible_nbfcs.find(l => l.partner_id === 'gyandhan');
+assert.ok(gyaLender, 'Gyandhan must be ELIGIBLE for income ₹20,000 (minimum income ₹15,000 decoupled from Avanse)');
+assert.strictEqual(gyaLender.decision_status, 'ELIGIBLE');
 
-const techLender = resGya.conditional_nbfcs.find(l => l.partner_id === 'techfino');
-assert.ok(techLender, 'Techfino must be CONDITIONAL for income ₹20,000');
+const techLender = resGya.eligible_nbfcs.find(l => l.partner_id === 'techfino');
+assert.ok(techLender, 'Techfino must be ELIGIBLE for income ₹20,000 (minimum income >= ₹20,000)');
+assert.strictEqual(techLender.decision_status, 'ELIGIBLE');
 
 // 3. Genuine Sub-₹15,000 Income must remain hard INELIGIBLE
 const sub15kPayload = {

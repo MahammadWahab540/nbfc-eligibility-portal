@@ -62,13 +62,35 @@ const eligible721 = res721.eligible_nbfcs.map(l => l.partner_id);
 assert(eligible721.includes('bajaj'), 'Bajaj MUST be eligible with score 721');
 
 // 2. Income Boundary Tests
-// Income 24,999: Gyandhan, Auxilo, Techfino fail; Fibe, Northern Arc, Bajaj pass
+// Income 14,999: Gyandhan, Auxilo, Techfino fail
+const p14999 = createBasePayload({ employment_details: { monthly_income: 14999, occupation: 'ENGINEER' } });
+const res14999 = engine.evaluate(p14999);
+const eligible14999 = res14999.eligible_nbfcs.map(l => l.partner_id);
+assert(!eligible14999.includes('gyandhan'), 'Gyandhan fails with 14999 income');
+assert(!eligible14999.includes('auxilo'), 'Auxilo fails with 14999 income');
+assert(!eligible14999.includes('techfino'), 'Techfino fails with 14999 income');
+
+// Income 19,999: Techfino fails (min 20000), Auxilo fails (min 25000)
+const p19999 = createBasePayload({ employment_details: { monthly_income: 19999, occupation: 'ENGINEER' } });
+const res19999 = engine.evaluate(p19999);
+const eligible19999 = res19999.eligible_nbfcs.map(l => l.partner_id);
+assert(!eligible19999.includes('techfino'), 'Techfino fails with 19999 income (min 20000)');
+assert(!eligible19999.includes('auxilo'), 'Auxilo fails with 19999 income');
+
+// Income 20,000: Techfino passes (min 20000), Auxilo fails (min 25000)
+const p20000 = createBasePayload({ employment_details: { monthly_income: 20000, occupation: 'ENGINEER' } });
+const res20000 = engine.evaluate(p20000);
+const eligible20000 = res20000.eligible_nbfcs.map(l => l.partner_id);
+assert(eligible20000.includes('techfino'), 'Techfino passes with 20000 income (min 20000)');
+assert(!eligible20000.includes('auxilo'), 'Auxilo fails with 20000 income');
+
+// Income 24,999: Auxilo fails (min 25000); Gyandhan (min 15000), Techfino (min 20000), Fibe, Northern Arc, Bajaj pass
 const p24999 = createBasePayload({ employment_details: { monthly_income: 24999, occupation: 'ENGINEER' } });
 const res24999 = engine.evaluate(p24999);
 const eligible24999 = res24999.eligible_nbfcs.map(l => l.partner_id);
-assert(!eligible24999.includes('gyandhan'), 'Gyandhan fails with 24999 income');
+assert(eligible24999.includes('gyandhan'), 'Gyandhan passes with 24999 income (min 15000)');
 assert(!eligible24999.includes('auxilo'), 'Auxilo fails with 24999 income');
-assert(!eligible24999.includes('techfino'), 'Techfino fails with 24999 income');
+assert(eligible24999.includes('techfino'), 'Techfino passes with 24999 income (min 20000)');
 assert(eligible24999.includes('fibe'), 'Fibe passes with 24999 income');
 
 // Income 25,000: Gyandhan, Auxilo, Techfino pass
@@ -80,12 +102,13 @@ assert(eligible25000.includes('auxilo'), 'Auxilo passes with 25000 income');
 assert(eligible25000.includes('techfino'), 'Techfino passes with 25000 income');
 
 // 3. Age Boundary Tests
-// Age 58: All 6 pass
+// Age 58: All active lenders with max age >= 58 pass
 const pAge58 = createBasePayload({ co_applicant_details: { name: 'A', age: 58, relation: 'Mother', state: 'Karnataka' } });
 const resAge58 = engine.evaluate(pAge58);
-assert.strictEqual(resAge58.eligible_nbfcs.length, 6, 'All 6 lenders must be eligible for age 58');
+const activeCount = engine.ruleSet.partners.filter(p => p.is_active !== false).length;
+assert.strictEqual(resAge58.eligible_nbfcs.length, activeCount, `All ${activeCount} active lenders must be eligible for age 58`);
 
-// Age 59: Gyandhan, Northern Arc, Auxilo, Techfino fail; Fibe (max 59) and Bajaj (max 65) pass
+// Age 59: Gyandhan, Northern Arc, Auxilo, Techfino fail; Fibe (max 59), Feemonk (max 60) and Bajaj (max 65) pass
 const pAge59 = createBasePayload({ co_applicant_details: { name: 'A', age: 59, relation: 'Mother', state: 'Karnataka' } });
 const resAge59 = engine.evaluate(pAge59);
 const eligibleAge59 = resAge59.eligible_nbfcs.map(l => l.partner_id);

@@ -129,13 +129,12 @@ let passedTests = 0;
 testCases.forEach((tc) => {
   const result = engine.evaluate(tc.payload);
 
-  // Assert essential invariant:
-  // Total lenders evaluated must equal active partners count (6)
-  assert.strictEqual(result.summary.total_lenders_evaluated, 6, `Case ${tc.id}: Must evaluate exactly 6 lenders`);
+  const activeCount = engine.ruleSet.partners.filter(p => p.is_active !== false).length;
+  assert.strictEqual(result.summary.total_lenders_evaluated, activeCount, `Case ${tc.id}: Must evaluate exactly ${activeCount} lenders`);
 
-  // Assert sum of eligible + conditional + ineligible equals 6
+  // Assert sum of eligible + conditional + ineligible equals active lenders count
   const totalClassified = result.eligible_nbfcs.length + result.conditional_nbfcs.length + result.ineligible_nbfcs.length;
-  assert.strictEqual(totalClassified, 6, `Case ${tc.id}: Sum of classifications must equal total lenders (6)`);
+  assert.strictEqual(totalClassified, activeCount, `Case ${tc.id}: Sum of classifications must equal total lenders (${activeCount})`);
 
   // Assert rankings are sequential starting at 1
   result.eligible_nbfcs.forEach((lender, rankIdx) => {

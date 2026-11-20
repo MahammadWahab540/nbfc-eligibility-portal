@@ -25,9 +25,9 @@ const TEAMS = {
 
 // Supported Academic Programs
 const PROGRAMS = {
-  genies: { id: 'genies', name: 'Genies', description: 'Foundational tech & career accelerator cohort' },
-  smart: { id: 'smart', name: 'Smart', description: 'Intensive full-stack software & data engineering academy' },
-  edge: { id: 'edge', name: 'Edge', description: 'Advanced placement-guaranteed & premium career track' }
+  genies: { id: 'genies', name: 'Genies', description: 'Elite tech & career accelerator cohort (Elite Program)' },
+  smart: { id: 'smart', name: 'Smart', description: 'Intensive full-stack software & data engineering academy (Standard Tier)' },
+  edge: { id: 'edge', name: 'Edge', description: 'Foundational career accelerator track (Entry Level)' }
 };
 
 // Field Priority Levels
@@ -1077,7 +1077,7 @@ class PayloadManagerService {
               required: true,
               enabled: true,
               priority: 'Critical',
-              options: ['Northern Arc', 'Bajaj Finserv', 'Auxilo', 'Fibe', 'Gyandhan', 'Techfino', 'Feemonk', 'Jodo Flex'],
+              options: ['Northern Arc', 'Bajaj Finserv', 'Auxilo', 'Fibe', 'Gyandhan', 'Techfino', 'Jodo Flex'],
               default_value: 'Northern Arc'
             },
             {

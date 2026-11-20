@@ -8,6 +8,20 @@ node_modules/
 batch_results.json
 nbfc_sheet_exported.csv
 
+# Lead data and exports (PII Protection)
+*.csv
+!nbfc_sheet.csv
+*leads*.json
+*sf*.json
+*audit*.json
+*cases*.json
+*summary*.json
+*report*.json
+*contradictions*.json
+*fixes*.json
+fresh_*.json
+drill_down_*.json
+
 # SQLite local database files
 *.db
 *.db-shm

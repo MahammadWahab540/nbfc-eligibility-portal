@@ -218,6 +218,9 @@ function renderPartners(partners) {
           <span class="apple-chip ${c.pan_aadhaar_linked_mandatory ? 'chip-neutral' : 'chip-blue'}">
             PAN-Aadhaar Link: ${c.pan_aadhaar_linked_mandatory ? 'Mandatory' : 'Optional'}
           </span>
+          <span class="apple-chip ${c.physical_pan_mandatory ? 'chip-amber' : (c.pan_card_mandatory ? 'chip-neutral' : 'chip-blue')}">
+            PAN: ${c.physical_pan_mandatory ? 'Physical PAN Mandatory' : (c.pan_card_mandatory ? 'PAN Card Mandatory' : 'Optional')}
+          </span>
           <span class="apple-chip ${!c.name_mismatch_allowed ? 'chip-neutral' : 'chip-success'}">
             Name Match: ${c.name_mismatch_allowed ? 'Flexible' : 'Strict Match'}
           </span>
@@ -420,7 +423,7 @@ function openEditModal(partnerId) {
   updateHiddenTagValue('edit-occupations-tags', 'edit-occupations', 'data-occ');
 
   document.getElementById('edit-pan-linked').checked = Boolean(c.pan_aadhaar_linked_mandatory);
-  document.getElementById('edit-pan-avail').checked = Boolean(c.pan_card_mandatory);
+  document.getElementById('edit-pan-avail').checked = Boolean(c.physical_pan_mandatory || c.pan_card_mandatory);
   document.getElementById('edit-coop-bank').checked = Boolean(c.non_nationalised_bank_accepted);
   document.getElementById('edit-dob-mismatch').checked = Boolean(c.dob_mismatch_allowed);
   document.getElementById('edit-name-mismatch').checked = Boolean(c.name_mismatch_allowed);
@@ -466,6 +469,7 @@ document.getElementById('edit-partner-form')?.addEventListener('submit', async (
     rejected_occupations: rawOccs.split(',').map(s => s.trim().toUpperCase()).filter(Boolean),
     pan_aadhaar_linked_mandatory: document.getElementById('edit-pan-linked').checked,
     pan_card_mandatory: document.getElementById('edit-pan-avail').checked,
+    physical_pan_mandatory: document.getElementById('edit-pan-avail').checked,
     non_nationalised_bank_accepted: document.getElementById('edit-coop-bank').checked,
     dob_mismatch_allowed: document.getElementById('edit-dob-mismatch').checked,
     name_mismatch_allowed: document.getElementById('edit-name-mismatch').checked,
@@ -1044,9 +1048,9 @@ const TEAM_NAMES = {
 };
 
 const PROGRAM_NAMES = {
-  genies: 'Genies Program',
-  smart: 'Smart Program',
-  edge: 'Edge Program'
+  genies: 'Genies (Elite Program)',
+  smart: 'Smart (Standard Tier)',
+  edge: 'Edge (Entry Level)'
 };
 
 function initPayloadManager() {

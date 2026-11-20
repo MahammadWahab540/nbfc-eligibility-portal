@@ -30,7 +30,22 @@ function evaluateIdentity(questions = {}, lenderCriteria, options = {}) {
   }
 
   // 2. Physical or E-PAN Availability
-  if (lenderCriteria.pan_card_mandatory) {
+  if (lenderCriteria.physical_pan_mandatory) {
+    if (questions.has_physical_pan === false || questions.has_e_pan_or_physical_pan === false) {
+      failures.push({
+        reason_code: 'PHYSICAL_PAN_MANDATORY',
+        detail: 'Physical PAN card is mandatory for this lender.'
+      });
+    } else if (questions.has_physical_pan === true || questions.has_e_pan_or_physical_pan === true) {
+      matched.push('Physical PAN card verified');
+    } else if (!isSkipped) {
+      unknownRequirements.push({
+        reason_code: 'PHYSICAL_PAN_UNVERIFIED',
+        detail: 'Physical PAN card availability is unverified.',
+        missing_requirement: 'Physical PAN card document'
+      });
+    }
+  } else if (lenderCriteria.pan_card_mandatory) {
     if (questions.has_e_pan_or_physical_pan === false) {
       failures.push({
         reason_code: 'PAN_CARD_NOT_AVAILABLE',

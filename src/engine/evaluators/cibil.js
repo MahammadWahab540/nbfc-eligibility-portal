@@ -109,6 +109,15 @@ function evaluateCibil(cibilObj, lenderCriteria, lenderPolicy = {}, applicantCon
       };
     }
 
+    // Prime bracket allowance (e.g. range "700 - 900" for prime cutoffs like Gyandhan 711 or Bajaj 721)
+    if ((lenderCriteria.allow_prime_bracket || lenderPolicy.allow_prime_bracket || applicantContext.allow_prime_bracket) && low >= 700 && high >= threshold) {
+      return {
+        status: 'PASS',
+        matched: `CIBIL range ${rawRange} accepted under prime credit tier (cutoff ${threshold})`,
+        range: [low, high]
+      };
+    }
+
     // Entire range below threshold
     if (high < threshold) {
       if (hasOverride) {

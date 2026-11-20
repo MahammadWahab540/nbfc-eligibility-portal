@@ -14,7 +14,7 @@ assert.strictEqual(normalizeLenderCode('Northern Arc Capital'), 'northern_arc');
 assert.strictEqual(normalizeLenderCode('FIBE / EarlySalary'), 'fibe');
 assert.strictEqual(normalizeLenderCode('TECHFINO'), 'techfino');
 assert.strictEqual(normalizeLenderCode('AUXILO FINSERVE'), 'auxilo');
-assert.strictEqual(normalizeLenderCode('FEEMONK'), 'feemonk');
+assert.strictEqual(normalizeLenderCode('FEEMONK'), 'fibe');
 assert.strictEqual(normalizeLenderCode('JODO_FLEX'), 'jodo_flex');
 console.log('✓ Test 1: normalizeLenderCode handles variants and external partners');
 
@@ -47,8 +47,8 @@ const sampleRecords = [
   },
   {
     userId: 'user_003',
-    Name: 'Test External Partner Feemonk',
-    'NBFC Onboarding Name': 'FEEMONK',
+    Name: 'Test External Partner Jodo Flex',
+    'NBFC Onboarding Name': 'JODO_FLEX',
     'NBFC Status': 'Disbursed',
     'CIBIL Score Range': '700 - 900',
     'Co-Applicant Monthly Income': '20000',
@@ -64,7 +64,7 @@ assert.strictEqual(report.dataset_metrics.unique_uids, 3);
 assert.strictEqual(report.contradiction_summary.confirmed_disbursed_matches, 1);
 assert.strictEqual(report.contradiction_summary.false_rejections_count, 1);
 assert.strictEqual(report.contradiction_summary.external_lenders_count, 1);
-assert.strictEqual(report.external_lender_breakdown.feemonk, 1);
+assert.strictEqual(report.external_lender_breakdown.jodo_flex, 1);
 console.log('✓ Test 2: In-memory reconciliation accurately separates matches, contradictions, and external partners');
 
 console.log('✓ All Reconciliation unit tests passed successfully.');

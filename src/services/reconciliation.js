@@ -26,10 +26,9 @@ function normalizeLenderCode(rawName) {
   if (s.includes('GYANDHAN')) return 'gyandhan';
   if (s.includes('BAJAJ')) return 'bajaj';
   if (s.includes('AUXILO')) return 'auxilo';
-  if (s.includes('FIBE') || s.includes('EARLYSALARY')) return 'fibe';
+  if (s.includes('FIBE') || s.includes('EARLYSALARY') || s.includes('FEEMONK')) return 'fibe';
   if (s.includes('NORTHERN') || s.includes('NARC')) return 'northern_arc';
   if (s.includes('TECHFINO')) return 'techfino';
-  if (s.includes('FEEMONK')) return 'feemonk';
   if (s.includes('JODO')) return 'jodo_flex';
   if (s.includes('SHOPSE')) return 'shopse';
   if (s.includes('PINELABS')) return 'pinelabs';

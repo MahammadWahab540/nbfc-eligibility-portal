@@ -234,6 +234,7 @@ function normalizeApplicant(payload = {}, parameterQuestions = null) {
     is_skipped: !hasExplicitQuestions,
     is_pan_aadhaar_linked: parseStrictBoolean(qSource.is_pan_aadhaar_linked),
     has_e_pan_or_physical_pan: parseStrictBoolean(qSource.has_e_pan_or_physical_pan),
+    has_physical_pan: parseStrictBoolean(qSource.has_physical_pan !== undefined ? qSource.has_physical_pan : qSource.has_e_pan_or_physical_pan),
     has_dob_mismatch: parseStrictBoolean(qSource.has_dob_mismatch),
     has_name_mismatch: parseStrictBoolean(qSource.has_name_mismatch),
     has_door_number: parseStrictBoolean(qSource.has_door_number) !== undefined
