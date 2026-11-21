@@ -10,11 +10,13 @@ const NBFCEligibilityEngine = require('./src/engine/index');
 const { getDatabaseRepository } = require('./src/db/database');
 const SalesforceSyncService = require('./src/services/salesforce_sync');
 const { getPayloadManagerService } = require('./src/services/payload_manager');
+const { getAuthService, ROLES } = require('./src/services/auth');
 
 const db = getDatabaseRepository();
 const engine = new NBFCEligibilityEngine({ dataPath: path.join(__dirname, 'data'), db });
 const sfSyncService = new SalesforceSyncService({ db });
 const payloadManager = getPayloadManagerService({ db, dataPath: path.join(__dirname, 'data') });
+const authService = getAuthService({ db });
 
 const PORT = process.env.PORT || 3000;
 const ADMIN_API_KEY = process.env.ADMIN_API_KEY || null;
@@ -44,17 +46,33 @@ function serveStaticFile(res, filePath, contentType) {
       res.writeHead(404, { 'Content-Type': 'text/plain' });
       res.end('File Not Found');
     } else {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
       res.writeHead(200, { 'Content-Type': contentType });
       res.end(data);
     }
   });
 }
 
-function checkAdminAuth(req) {
-  if (!ADMIN_API_KEY) return true; // Open if not explicitly configured
+function extractAuthUser(req) {
   const authHeader = req.headers['authorization'] || '';
   const token = authHeader.replace(/^Bearer\s+/i, '').trim();
-  return token === ADMIN_API_KEY;
+  if (!token) return null;
+  if (ADMIN_API_KEY && token === ADMIN_API_KEY) {
+    return { userId: 'legacy_admin', username: 'admin', name: 'Legacy API Admin', role: ROLES.ADMIN };
+  }
+  return authService.verifyToken(token);
+}
+
+function checkAdminAuth(req) {
+  const user = extractAuthUser(req);
+  if (!user) return false;
+  return user.role === ROLES.ADMIN;
+}
+
+function checkCanOperate(req) {
+  const user = extractAuthUser(req);
+  if (!user) return false;
+  return user.role === ROLES.ADMIN || user.role === ROLES.BASIC;
 }
 
 const server = http.createServer(async (req, res) => {
@@ -76,6 +94,10 @@ const server = http.createServer(async (req, res) => {
     // STATIC ASSETS
     // -------------------------------------------------------------
     if (req.method === 'GET') {
+      if (pathname === '/legacy-login') {
+        res.writeHead(302, { 'Location': '/' });
+        return res.end();
+      }
       if (pathname === '/' || pathname === '/index.html') {
         return serveStaticFile(res, path.join(__dirname, 'public', 'index.html'), 'text/html');
       }
@@ -94,6 +116,111 @@ const server = http.createServer(async (req, res) => {
     // -------------------------------------------------------------
     // API: SYSTEM HEALTH & READINESS
     // -------------------------------------------------------------
+    // -------------------------------------------------------------
+    // API: AUTHENTICATION & ROLE-BASED ACCESS CONTROL (RBAC)
+    // -------------------------------------------------------------
+    if (req.method === 'POST' && pathname === '/api/v1/auth/signup') {
+      return sendJSON(res, 403, {
+        success: false,
+        error: 'Self-registration is disabled. Please contact your NBFC administrator to obtain credentials.'
+      });
+    }
+
+    if (req.method === 'POST' && pathname === '/api/v1/auth/login') {
+      const body = await parseBody(req);
+      try {
+        const result = authService.login(body.username || body.email, body.password, body.role);
+        return sendJSON(res, 200, {
+          success: true,
+          token: result.token,
+          user: result.user
+        });
+      } catch (err) {
+        return sendJSON(res, 401, {
+          success: false,
+          error: err.message
+        });
+      }
+    }
+
+    if (req.method === 'POST' && pathname === '/api/v1/auth/change-password') {
+      const user = extractAuthUser(req);
+      if (!user) {
+        return sendJSON(res, 401, { success: false, error: 'Unauthorized: Active user session required' });
+      }
+      const body = await parseBody(req);
+      try {
+        const result = authService.changePassword(user.userId, body.currentPassword, body.newPassword);
+        return sendJSON(res, 200, result);
+      } catch (err) {
+        return sendJSON(res, 400, { success: false, error: err.message });
+      }
+    }
+
+    if (req.method === 'GET' && pathname === '/api/v1/auth/me') {
+      const user = extractAuthUser(req);
+      if (!user) {
+        return sendJSON(res, 401, { authenticated: false, error: 'Not authenticated or token expired' });
+      }
+      return sendJSON(res, 200, { authenticated: true, user });
+    }
+
+    if (req.method === 'GET' && pathname === '/api/v1/auth/roles') {
+      return sendJSON(res, 200, {
+        roles: [
+          {
+            id: 'admin',
+            name: 'Administrator',
+            description: 'Full administrative access: edit rules, criteria cutoffs, lender status, priorities & settings',
+            badgeClass: 'bg-purple-100 text-purple-800 border-purple-200'
+          },
+          {
+            id: 'basic',
+            name: 'Basic User (Ops / Agent)',
+            description: 'Operational access: run eligibility simulator, test KYC applicants, select lenders (read-only rules)',
+            badgeClass: 'bg-blue-100 text-blue-800 border-blue-200'
+          },
+          {
+            id: 'viewer',
+            name: 'All Visible Access (Auditor)',
+            description: 'Full visibility across all modules, settings & audit logs in strictly read-only mode',
+            badgeClass: 'bg-amber-100 text-amber-800 border-amber-200'
+          }
+        ]
+      });
+    }
+
+    if (req.method === 'GET' && pathname === '/api/v1/auth/demo-users') {
+      return sendJSON(res, 200, {
+        demoUsers: [
+          {
+            username: 'admin',
+            role: 'admin',
+            roleLabel: 'Administrator',
+            name: 'Risk Operations Admin',
+            email: 'admin@nxtwave.tech',
+            badgeColor: 'purple'
+          },
+          {
+            username: 'basic',
+            role: 'basic',
+            roleLabel: 'Basic User',
+            name: 'Operations Agent',
+            email: 'ops@nxtwave.tech',
+            badgeColor: 'blue'
+          },
+          {
+            username: 'viewer',
+            role: 'viewer',
+            roleLabel: 'All Visible Access',
+            name: 'Compliance Auditor',
+            email: 'auditor@nxtwave.tech',
+            badgeColor: 'amber'
+          }
+        ]
+      });
+    }
+
     if (req.method === 'GET' && pathname === '/health') {
       engine.loadData();
       return sendJSON(res, 200, {
@@ -368,6 +495,7 @@ const server = http.createServer(async (req, res) => {
     // API: GET SINGLE EVALUATION DETAIL
     // -------------------------------------------------------------
     if (req.method === 'GET' && pathname.match(/^\/api\/v1\/evaluations\/([^/]+)$/)) {
+
       const evaluationId = pathname.split('/')[4];
       const evaluation = db.getEvaluationById(evaluationId);
       if (!evaluation) {
@@ -380,7 +508,11 @@ const server = http.createServer(async (req, res) => {
     // API: SELECTION CALLBACK WITH REAL/VERIFIED SYNC
     // -------------------------------------------------------------
     if (req.method === 'POST' && pathname.match(/^\/api\/v1\/eligibility\/([^/]+)\/select$/)) {
+
       const evaluationId = pathname.split('/')[4];
+      if (!checkCanOperate(req)) {
+        return sendJSON(res, 403, { error: 'Forbidden', message: 'All Visible Access (Viewer) accounts have read-only permissions and cannot confirm lender selections.' });
+      }
       const body = await parseBody(req);
       const rawSelectedId = (body.selected_nbfc_id || '').toLowerCase();
       const selectedId = rawSelectedId === 'feemonk' ? 'fibe' : rawSelectedId;
@@ -445,6 +577,9 @@ const server = http.createServer(async (req, res) => {
 
     // Save Draft Fields for Team x Program
     if (req.method === 'PUT' && pathname.match(/^\/api\/v1\/payload-configs\/([^/]+)\/([^/]+)\/draft$/)) {
+      if (!checkCanOperate(req)) {
+        return sendJSON(res, 403, { error: 'Forbidden', message: 'Viewer accounts have read-only access and cannot save draft configurations.' });
+      }
       const parts = pathname.split('/');
       const teamId = parts[4];
       const programId = parts[5];
@@ -466,6 +601,9 @@ const server = http.createServer(async (req, res) => {
 
     // Publish Draft to Live Version
     if (req.method === 'POST' && pathname.match(/^\/api\/v1\/payload-configs\/([^/]+)\/([^/]+)\/publish$/)) {
+      if (!checkAdminAuth(req)) {
+        return sendJSON(res, 401, { error: 'Unauthorized', message: 'Admin access required to publish payload configurations.' });
+      }
       const parts = pathname.split('/');
       const teamId = parts[4];
       const programId = parts[5];
@@ -530,6 +668,9 @@ const server = http.createServer(async (req, res) => {
 
     // Rollback to Historical Version
     if (req.method === 'POST' && pathname.match(/^\/api\/v1\/payload-configs\/([^/]+)\/([^/]+)\/rollback$/)) {
+      if (!checkAdminAuth(req)) {
+        return sendJSON(res, 401, { error: 'Unauthorized', message: 'Admin access required to rollback payload configurations.' });
+      }
       const parts = pathname.split('/');
       const teamId = parts[4];
       const programId = parts[5];

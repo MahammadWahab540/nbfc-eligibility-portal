@@ -1,6 +1,7 @@
 const { execSync } = require('child_process');
 
 const testSuites = [
+  'test/unit/auth.test.js',
   'test/unit/cibil.test.js',
   'test/unit/relationship.test.js',
   'test/unit/bank.test.js',

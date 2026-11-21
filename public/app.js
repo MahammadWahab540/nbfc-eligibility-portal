@@ -1,6 +1,51 @@
 // NBFC Partner Portal · Executive Business Client Application
 // Apple-Style Clean Architecture with Non-Development UX Writing
 
+// =========================================================================
+// AUTHENTICATION & ROLE-BASED ACCESS CONTROL (RBAC) STATE
+// =========================================================================
+let currentAuthToken = localStorage.getItem('nbfc_auth_token') || null;
+let currentAuthUser = null;
+try {
+  currentAuthUser = JSON.parse(localStorage.getItem('nbfc_auth_user') || 'null');
+} catch (e) {
+  currentAuthUser = null;
+}
+
+// Global fetch wrapper to append Bearer token & handle 401s
+const originalFetch = window.fetch;
+window.fetch = async function(url, options = {}) {
+  options = options || {};
+  options.headers = options.headers || {};
+
+  if (currentAuthToken) {
+    if (options.headers instanceof Headers) {
+      if (!options.headers.has('Authorization')) {
+        options.headers.set('Authorization', `Bearer ${currentAuthToken}`);
+      }
+    } else if (Array.isArray(options.headers)) {
+      if (!options.headers.some(([k]) => k.toLowerCase() === 'authorization')) {
+        options.headers.push(['Authorization', `Bearer ${currentAuthToken}`]);
+      }
+    } else {
+      if (!options.headers['Authorization'] && !options.headers['authorization']) {
+        options.headers['Authorization'] = `Bearer ${currentAuthToken}`;
+      }
+    }
+  }
+
+  const response = await originalFetch.apply(this, [url, options]);
+
+  // Handle 401 Unauthorized globally (exclude auth endpoints)
+  if (response.status === 401 && typeof url === 'string' && !url.includes('/api/v1/auth/login')) {
+    console.warn('Session expired or unauthorized request to:', url);
+    clearAuthSession();
+    showSignupPage();
+  }
+
+  return response;
+};
+
 const DEFAULT_SAMPLE_PAYLOAD = {
   "event_type": "KYC_SUBMISSION",
   "user_details": {
@@ -56,13 +101,527 @@ const AVAILABLE_OCCUPATIONS = [
   { id: "MEDIA", label: "Film / Media / Celebrities" }
 ];
 
-document.addEventListener('DOMContentLoaded', () => {
+
+// =========================================================================
+// AUTHENTICATION & RBAC HELPER FUNCTIONS
+// =========================================================================
+function clearAuthSession() {
+  currentAuthToken = null;
+  currentAuthUser = null;
+  localStorage.removeItem('nbfc_auth_token');
+  localStorage.removeItem('nbfc_auth_user');
+}
+
+function showSignupPage() {
+  const signupView = document.getElementById('signup-page-view');
+  const dashboardView = document.getElementById('portal-dashboard-wrapper');
+  if (signupView) {
+    signupView.classList.remove('hidden');
+    signupView.style.setProperty('display', 'flex', 'important');
+  }
+  if (dashboardView) {
+    dashboardView.classList.add('hidden');
+    dashboardView.style.setProperty('display', 'none', 'important');
+  }
+}
+
+function showDashboard() {
+  const signupView = document.getElementById('signup-page-view');
+  const dashboardView = document.getElementById('portal-dashboard-wrapper');
+  if (signupView) {
+    signupView.classList.add('hidden');
+    signupView.style.setProperty('display', 'none', 'important');
+  }
+  if (dashboardView) {
+    dashboardView.classList.remove('hidden');
+    dashboardView.style.setProperty('display', 'flex', 'important');
+  }
+}
+
+function updateAuthHeaderUI() {
+  if (!currentAuthUser) return;
+  const nameEl = document.getElementById('auth-user-name');
+  const badgeEl = document.getElementById('auth-user-role-badge');
+  const avatarEl = document.getElementById('auth-user-avatar');
+
+  if (nameEl) nameEl.textContent = currentAuthUser.name || currentAuthUser.username;
+  
+  if (avatarEl) {
+    const initial = (currentAuthUser.name || currentAuthUser.username || 'U')[0].toUpperCase();
+    avatarEl.textContent = initial;
+    if (currentAuthUser.role === 'admin') {
+      avatarEl.className = 'w-7 h-7 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-xs';
+    } else if (currentAuthUser.role === 'basic') {
+      avatarEl.className = 'w-7 h-7 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-600 text-white font-bold text-xs flex items-center justify-center shadow-xs';
+    } else {
+      avatarEl.className = 'w-7 h-7 rounded-full bg-gradient-to-tr from-amber-500 to-orange-500 text-white font-bold text-xs flex items-center justify-center shadow-xs';
+    }
+  }
+
+  if (badgeEl) {
+    if (currentAuthUser.role === 'admin') {
+      badgeEl.textContent = 'Admin';
+      badgeEl.className = 'px-1.5 py-0.2 text-[9px] font-extrabold uppercase rounded-full bg-purple-100 text-purple-800 border border-purple-200';
+    } else if (currentAuthUser.role === 'basic') {
+      badgeEl.textContent = 'Basic User';
+      badgeEl.className = 'px-1.5 py-0.2 text-[9px] font-extrabold uppercase rounded-full bg-blue-100 text-blue-800 border border-blue-200';
+    } else {
+      badgeEl.textContent = 'All Visible';
+      badgeEl.className = 'px-1.5 py-0.2 text-[9px] font-extrabold uppercase rounded-full bg-amber-100 text-amber-800 border border-amber-200';
+    }
+  }
+}
+
+function applyRolePermissions(role) {
+  const noticeBanner = document.getElementById('role-notice-banner');
+  const noticeText = document.getElementById('role-notice-text');
+
+  if (noticeBanner && noticeText) {
+    if (role === 'admin') {
+      noticeBanner.className = 'border-b transition-all role-notice-banner-admin';
+      noticeText.innerHTML = `
+        <span class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>
+        <span class="font-medium text-purple-950">👑 <strong>Administrator Mode Active</strong> — Full privileges to edit partner guidelines, adjust cutoffs, toggle active status, reorder priorities & publish schemas.</span>
+      `;
+    } else if (role === 'basic') {
+      noticeBanner.className = 'border-b transition-all role-notice-banner-basic';
+      noticeText.innerHTML = `
+        <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+        <span class="font-medium text-blue-950">👤 <strong>Basic User Mode Active (Ops / Agent)</strong> — Operational mode: check eligibility, test KYC applicants & select lenders. Policy rules & preferences are Read-Only.</span>
+      `;
+    } else {
+      // Viewer / All Visible Access
+      noticeBanner.className = 'border-b transition-all role-notice-banner-viewer';
+      noticeText.innerHTML = `
+        <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+        <span class="font-medium text-amber-950">👁️ <strong>All Visible Access Mode Active (Auditor)</strong> — Full transparency across all 5 modules (Lenders, Simulator, Preferences, Change History, Payloads) in strictly Read-Only mode.</span>
+      `;
+    }
+  }
+
+  // 1. Add Partner button
+  const addPartnerBtn = document.getElementById('btn-open-add-partner-modal');
+  if (addPartnerBtn) {
+    if (role === 'admin') {
+      addPartnerBtn.classList.remove('hidden');
+      addPartnerBtn.disabled = false;
+    } else {
+      addPartnerBtn.classList.add('hidden');
+    }
+  }
+
+  // 2. Preferences Save button & inputs
+  const settingsForm = document.getElementById('settings-form');
+  const saveSettingsBtn = document.getElementById('btn-save-settings') || document.querySelector('#tab-settings button[type="submit"]');
+  if (saveSettingsBtn) {
+    if (role === 'admin') {
+      saveSettingsBtn.classList.remove('hidden');
+      saveSettingsBtn.disabled = false;
+    } else {
+      saveSettingsBtn.classList.add('hidden');
+    }
+  }
+  if (settingsForm) {
+    const inputs = settingsForm.querySelectorAll('input, select, textarea');
+    inputs.forEach(inp => {
+      inp.disabled = (role !== 'admin');
+    });
+  }
+
+  // 3. Payload Manager Action buttons
+  const publishPayloadBtn = document.getElementById('btn-publish-payload');
+  const addPayloadFieldBtn = document.getElementById('btn-add-payload-field');
+  const savePayloadDraftBtn = document.getElementById('btn-save-payload-draft');
+
+  if (publishPayloadBtn) {
+    if (role === 'admin') {
+      publishPayloadBtn.classList.remove('hidden');
+      publishPayloadBtn.disabled = false;
+    } else {
+      publishPayloadBtn.classList.add('hidden');
+    }
+  }
+
+  if (addPayloadFieldBtn) {
+    if (role === 'admin') {
+      addPayloadFieldBtn.classList.remove('hidden');
+      addPayloadFieldBtn.disabled = false;
+    } else {
+      addPayloadFieldBtn.classList.add('hidden');
+    }
+  }
+
+  if (savePayloadDraftBtn) {
+    if (role === 'viewer') {
+      savePayloadDraftBtn.disabled = true;
+      savePayloadDraftBtn.classList.add('role-readonly-disabled');
+    } else {
+      savePayloadDraftBtn.disabled = false;
+      savePayloadDraftBtn.classList.remove('role-readonly-disabled');
+    }
+  }
+
+  // 4. Simulator: Selection Confirm button (disabled for viewer)
+  const submitSelectionBtn = document.getElementById('btn-submit-selection');
+  if (submitSelectionBtn) {
+    if (role === 'viewer') {
+      submitSelectionBtn.disabled = true;
+      submitSelectionBtn.title = 'Lender selection is disabled in All Visible Access (Read-Only) mode';
+      submitSelectionBtn.classList.add('role-readonly-disabled');
+    } else {
+      submitSelectionBtn.disabled = false;
+      submitSelectionBtn.title = '';
+      submitSelectionBtn.classList.remove('role-readonly-disabled');
+    }
+  }
+
+  // Re-render partners with role awareness
+  if (currentPartners && currentPartners.length > 0) {
+    renderPartners(currentPartners);
+  }
+}
+
+function setupAuthEvents() {
+  // Header Sign Out button (returns to primary Signup entry page)
+  document.getElementById('btn-header-signout')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    clearAuthSession();
+    showSignupPage();
+  });
+
+  // Handled via handleSignupSubmit below
+
+  // NBFC Portal Login Submission Handler
+async function handleLoginSubmit(usernameOrEmail, password) {
+  const submitBtn = document.getElementById('btn-login-submit');
+  const errBox = document.getElementById('login-error-alert');
+  const errText = document.getElementById('login-error-message');
+
+  if (errBox) errBox.classList.add('hidden');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Signing in...';
+  }
+
+  try {
+    const res = await originalFetch('/api/v1/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: usernameOrEmail, password })
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      const errorMsg = data.error || 'Invalid email/username or password';
+      if (errBox && errText) {
+        errText.textContent = errorMsg;
+        errBox.classList.remove('hidden');
+      }
+      return;
+    }
+
+    // Successful authentication of provisioned user
+    currentAuthToken = data.token;
+    currentAuthUser = data.user;
+    localStorage.setItem('nbfc_auth_token', data.token);
+    localStorage.setItem('nbfc_auth_user', JSON.stringify(data.user));
+
+    updateAuthHeaderUI();
+    applyRolePermissions(data.user.role || 'basic');
+    showDashboard();
+
+    try { loadPartners(); } catch (err) { console.warn('loadPartners error:', err); }
+    try { loadSettings(); } catch (err) { console.warn('loadSettings error:', err); }
+    try { loadAuditLogs(); } catch (err) { console.warn('loadAuditLogs error:', err); }
+    try { initSimulator(); } catch (err) { console.warn('initSimulator error:', err); }
+    try { initPayloadManager(); } catch (err) { console.warn('initPayloadManager error:', err); }
+
+  } catch (err) {
+    console.error('Login error:', err);
+    if (errBox && errText) {
+      errText.textContent = 'Network or server error during sign in';
+      errBox.classList.remove('hidden');
+    }
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Sign In';
+    }
+  }
+}
+
+  // Primary Login form submission
+  const loginForm = document.getElementById('form-login-entry') || document.getElementById('form-signup-entry');
+  loginForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const userInput = document.getElementById('login-username-input') || document.getElementById('signup-email-input');
+    const passInput = document.getElementById('login-password-input') || document.getElementById('signup-password-input');
+    const usernameOrEmail = userInput?.value.trim() || '';
+    const password = passInput?.value || '';
+    await handleLoginSubmit(usernameOrEmail, password);
+  });
+
+  // =========================================================================
+  // USER PROFILE DROPDOWN & CHANGE PASSWORD LOGIC
+  // =========================================================================
+  const userContainer = document.getElementById('auth-user-container');
+  const dropdownMenu = document.getElementById('profile-dropdown-menu');
+  const dropdownChevron = document.getElementById('profile-dropdown-chevron');
+
+  function closeProfileDropdown() {
+    if (dropdownMenu) dropdownMenu.classList.add('hidden');
+    if (dropdownChevron) dropdownChevron.classList.remove('rotate-180');
+  }
+
+  function toggleProfileDropdown() {
+    if (!dropdownMenu) return;
+    const isHidden = dropdownMenu.classList.toggle('hidden');
+    if (dropdownChevron) {
+      if (isHidden) {
+        dropdownChevron.classList.remove('rotate-180');
+      } else {
+        dropdownChevron.classList.add('rotate-180');
+      }
+    }
+  }
+
+  userContainer?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleProfileDropdown();
+  });
+
+  // Close dropdown on outside click
+  document.addEventListener('click', (e) => {
+    const wrapper = document.getElementById('user-profile-dropdown-wrapper');
+    if (wrapper && !wrapper.contains(e.target)) {
+      closeProfileDropdown();
+    }
+  });
+
+  // Dropdown Logout button
+  document.getElementById('btn-dropdown-logout')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    closeProfileDropdown();
+    clearAuthSession();
+    showSignupPage();
+  });
+
+  // Modal elements
+  const cpModal = document.getElementById('modal-change-password');
+  const cpForm = document.getElementById('form-change-password');
+  const cpErrorAlert = document.getElementById('cp-error-alert');
+  const cpErrorMessage = document.getElementById('cp-error-message');
+  const cpSuccessAlert = document.getElementById('cp-success-alert');
+  const cpSuccessMessage = document.getElementById('cp-success-message');
+
+  function openChangePasswordModal() {
+    closeProfileDropdown();
+    if (cpForm) cpForm.reset();
+    if (cpErrorAlert) cpErrorAlert.classList.add('hidden');
+    if (cpSuccessAlert) cpSuccessAlert.classList.add('hidden');
+    // Reset any password fields to type="password"
+    ['cp-input-current', 'cp-input-new', 'cp-input-confirm'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.type = 'password';
+    });
+    // Reset toggle eye icons
+    document.querySelectorAll('#form-change-password .icon-eye').forEach(el => el.classList.remove('hidden'));
+    document.querySelectorAll('#form-change-password .icon-eye-off').forEach(el => el.classList.add('hidden'));
+
+    if (cpModal) {
+      cpModal.classList.remove('hidden');
+    }
+  }
+
+  function closeChangePasswordModal() {
+    if (cpModal) {
+      cpModal.classList.add('hidden');
+    }
+    if (cpForm) cpForm.reset();
+  }
+
+  // Open modal from dropdown
+  document.getElementById('btn-dropdown-change-password')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openChangePasswordModal();
+  });
+
+  // Close modal buttons
+  document.getElementById('btn-close-change-password-modal')?.addEventListener('click', closeChangePasswordModal);
+  document.getElementById('btn-cancel-change-password')?.addEventListener('click', closeChangePasswordModal);
+
+  // Close modal when clicking backdrop
+  cpModal?.addEventListener('click', (e) => {
+    if (e.target === cpModal) {
+      closeChangePasswordModal();
+    }
+  });
+
+  // Password visibility toggle helper
+  function setupPasswordToggle(btnId, inputId) {
+    const btn = document.getElementById(btnId);
+    const input = document.getElementById(inputId);
+    if (!btn || !input) return;
+
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+
+      const eye = btn.querySelector('.icon-eye');
+      const eyeOff = btn.querySelector('.icon-eye-off');
+      if (eye && eyeOff) {
+        if (isPassword) {
+          eye.classList.add('hidden');
+          eyeOff.classList.remove('hidden');
+        } else {
+          eye.classList.remove('hidden');
+          eyeOff.classList.add('hidden');
+        }
+      }
+    });
+  }
+
+  setupPasswordToggle('btn-toggle-cp-current', 'cp-input-current');
+  setupPasswordToggle('btn-toggle-cp-new', 'cp-input-new');
+  setupPasswordToggle('btn-toggle-cp-confirm', 'cp-input-confirm');
+
+  // Change Password form submission
+  cpForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const currentInput = document.getElementById('cp-input-current');
+    const newInput = document.getElementById('cp-input-new');
+    const confirmInput = document.getElementById('cp-input-confirm');
+    const submitBtn = document.getElementById('btn-submit-change-password');
+
+    const currentPassword = currentInput?.value || '';
+    const newPassword = newInput?.value || '';
+    const confirmPassword = confirmInput?.value || '';
+
+    // Clear previous alerts
+    if (cpErrorAlert) cpErrorAlert.classList.add('hidden');
+    if (cpSuccessAlert) cpSuccessAlert.classList.add('hidden');
+
+    // Validation checks
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      if (cpErrorAlert && cpErrorMessage) {
+        cpErrorMessage.textContent = 'All password fields are required.';
+        cpErrorAlert.classList.remove('hidden');
+      }
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      if (cpErrorAlert && cpErrorMessage) {
+        cpErrorMessage.textContent = 'New password must be at least 6 characters long.';
+        cpErrorAlert.classList.remove('hidden');
+      }
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      if (cpErrorAlert && cpErrorMessage) {
+        cpErrorMessage.textContent = 'New password and confirmation do not match.';
+        cpErrorAlert.classList.remove('hidden');
+      }
+      return;
+    }
+
+    if (currentPassword === newPassword) {
+      if (cpErrorAlert && cpErrorMessage) {
+        cpErrorMessage.textContent = 'New password must be different from current password.';
+        cpErrorAlert.classList.remove('hidden');
+      }
+      return;
+    }
+
+    // Submit to backend
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Updating...';
+    }
+
+    try {
+      const res = await originalFetch('/api/v1/auth/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${currentAuthToken}`
+        },
+        body: JSON.stringify({ currentPassword, newPassword })
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        if (cpErrorAlert && cpErrorMessage) {
+          cpErrorMessage.textContent = data.error || 'Failed to update password.';
+          cpErrorAlert.classList.remove('hidden');
+        }
+        return;
+      }
+
+      // Success
+      if (cpSuccessAlert && cpSuccessMessage) {
+        cpSuccessMessage.textContent = 'Password updated successfully! You can now use your new password.';
+        cpSuccessAlert.classList.remove('hidden');
+      }
+      if (cpForm) cpForm.reset();
+
+      // Automatically close modal after 1.5 seconds
+      setTimeout(() => {
+        closeChangePasswordModal();
+      }, 1500);
+
+    } catch (err) {
+      console.error('Change password error:', err);
+      if (cpErrorAlert && cpErrorMessage) {
+        cpErrorMessage.textContent = 'Network or server error updating password.';
+        cpErrorAlert.classList.remove('hidden');
+      }
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Update Password';
+      }
+    }
+  });
+}
+
+async function checkAndRestoreSession() {
+  if (currentAuthToken && currentAuthUser) {
+    try {
+      const res = await originalFetch('/api/v1/auth/me', {
+        headers: { 'Authorization': `Bearer ${currentAuthToken}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        currentAuthUser = data.user;
+        updateAuthHeaderUI();
+        applyRolePermissions(currentAuthUser.role);
+        showDashboard();
+        loadPartners();
+        loadSettings();
+        loadAuditLogs();
+        initSimulator();
+        initPayloadManager();
+        return;
+      }
+    } catch (e) {
+      console.warn('Auto-login session verification failed:', e);
+    }
+  }
+
+  // If no active session, show the primary Signup entry page (hide login modal)
+  clearAuthSession();
+  showSignupPage();
+}
+
+
+document.addEventListener('DOMContentLoaded', async () => {
   setupTabs();
-  loadPartners();
-  loadSettings();
-  loadAuditLogs();
-  initSimulator();
-  initPayloadManager();
+  setupAuthEvents();
+  await checkAndRestoreSession();
 });
 
 // Apple Segmented Tabs
@@ -136,7 +695,7 @@ function renderPartners(partners) {
     return `
       <div class="apple-card p-6 flex flex-col justify-between space-y-4 fade-in ${!isActive ? 'opacity-60 bg-slate-50' : ''}" 
            id="partner-card-${p.id}" 
-           draggable="true" 
+           draggable="${currentAuthUser?.role === 'admin' ? 'true' : 'false'}" 
            data-partner-id="${p.id}" 
            data-index="${index}">
         
@@ -229,7 +788,7 @@ function renderPartners(partners) {
 
         <!-- Edit Guidelines Action -->
         <div class="pt-2 flex items-center justify-between border-t border-slate-100">
-          <span class="text-[11px] text-slate-400">Drag card to change student priority</span>
+          <span class="text-[11px] text-slate-400">${currentAuthUser?.role === 'admin' ? 'Drag card to change student priority' : 'Configured Priority #' + (index + 1)}</span>
           <button onclick="openEditModal('${p.id}')" class="apple-btn-secondary text-xs">
             Edit Guidelines
           </button>
