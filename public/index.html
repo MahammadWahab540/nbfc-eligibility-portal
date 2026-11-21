@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NxtWave NBFC Portal · Credit Policies & Prioritisation</title>
+  <title>NBFC Portal · Credit Policies & Prioritisation</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -11,10 +11,71 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=7.0.0">
 </head>
 <body class="min-h-screen flex flex-col bg-[#f5f5f7] text-[#1d1d1f] selection:bg-blue-100 selection:text-blue-900 font-sans antialiased">
 
+  <!-- ================================================================= -->
+  <!-- PRIMARY ENTRY POINT: SIGNUP APPLICATION (shadcn/ui Signup1) -->
+  <!-- ================================================================= -->
+  <div id="signup-page-view" class="bg-muted min-h-screen flex items-center justify-center p-4" style="display: flex;">
+    <div class="border-muted bg-background flex w-full max-w-sm flex-col items-center gap-y-8 rounded-md border px-6 py-12 shadow-md">
+      <div class="flex flex-col items-center gap-y-3 text-center">
+        <!-- NBFC Portal Emblem -->
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-[#0052FF] via-[#0066FF] to-[#00D2FF] flex items-center justify-center text-white shadow-md shadow-blue-500/25 ring-1 ring-white/20">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 18V6.5C4 5.67 4.67 5 5.5 5H6.5L14 15.5V6.5C14 5.67 14.67 5 15.5 5H16.5C17.33 5 18 5.67 18 6.5V17.5C18 18.33 17.33 19 16.5 19H15.5L8 8.5V17.5C8 18.33 7.33 19 6.5 19H5.5C4.67 19 4 18.33 4 17.5V18Z" fill="white"/>
+            <circle cx="19.5" cy="6.5" r="1.5" fill="#67E8F9"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-2xl font-extrabold tracking-tight text-foreground">NBFC Portal</h1>
+          <p class="text-xs text-muted-foreground mt-1">Sign in with your team credentials</p>
+        </div>
+      </div>
+
+      <div class="flex w-full flex-col gap-6">
+        <form id="form-login-entry" class="flex flex-col gap-4">
+          <!-- Inline Error Alert -->
+          <div id="login-error-alert" class="hidden p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center space-x-2">
+            <svg class="w-4 h-4 shrink-0 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span id="login-error-message">Invalid email/username or password</span>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <input
+              id="login-username-input"
+              type="text"
+              placeholder="Email or Username"
+              required
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-medium"
+            />
+          </div>
+          <div class="flex flex-col gap-2">
+            <input
+              id="login-password-input"
+              type="password"
+              placeholder="Password"
+              required
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-medium"
+            />
+          </div>
+          <button
+            type="submit"
+            id="btn-login-submit"
+            class="mt-2 inline-flex h-10 w-full items-center justify-center whitespace-nowrap rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer shadow-sm"
+          >
+            Sign In
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- EXISTING PORTAL DASHBOARD WRAPPER (PRESERVED IN FULL) -->
+  <!-- ================================================================= -->
+  <div id="portal-dashboard-wrapper" class="hidden flex-1 flex flex-col" style="display: none;">
   <!-- Apple Frosted Top Header -->
   <header class="sticky top-0 z-40 bg-white/85 backdrop-blur-xl border-b border-black/[0.06] transition-all">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -29,7 +90,7 @@
         </div>
         <div>
           <div class="flex items-center space-x-2">
-            <span class="text-sm font-bold tracking-tight text-slate-900">NxtWave NBFC Portal</span>
+            <span class="text-sm font-bold tracking-tight text-slate-900">NBFC Portal</span>
             <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-blue-50 text-blue-700 border border-blue-200/60">Education Loans</span>
           </div>
           <p class="text-[11px] text-slate-500 font-normal">Credit policy rules, lender prioritization & applicant matching</p>
@@ -60,14 +121,45 @@
         </button>
       </div>
 
-      <!-- Live Operational Status -->
-      <div class="flex items-center space-x-2">
-        <div class="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-semibold border border-emerald-200/80 shadow-xs">
+      <!-- Live Operational Status & User Session Badge -->
+      <div class="flex items-center space-x-2.5">
+        <div class="hidden sm:flex items-center space-x-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-semibold border border-emerald-200/80 shadow-xs">
           <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
           <span>Engine Active</span>
         </div>
-      </div>
 
+        <!-- User Profile & Role Dropdown Container -->
+        <div class="relative" id="user-profile-dropdown-wrapper">
+          <div id="auth-user-container" class="flex items-center space-x-2 bg-slate-100/90 hover:bg-slate-200/80 p-1.5 pr-2.5 rounded-full border border-slate-200/80 transition-all cursor-pointer select-none" title="User Profile Menu">
+            <div id="auth-user-avatar" class="w-7 h-7 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-xs">
+              A
+            </div>
+            <div class="flex items-center space-x-1.5 text-left">
+              <span id="auth-user-name" class="text-xs font-bold text-slate-800 leading-tight">Admin User</span>
+              <span id="auth-user-role-badge" class="px-1.5 py-0.5 text-[9px] font-extrabold uppercase rounded-full bg-purple-100 text-purple-800 border border-purple-200">Admin</span>
+              <svg id="profile-dropdown-chevron" class="w-3.5 h-3.5 text-slate-500 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </div>
+          </div>
+
+          <!-- Dropdown Menu (Styled matching user expected UI) -->
+          <div id="profile-dropdown-menu" class="hidden absolute right-0 mt-2 w-64 bg-[#0a0a0c] text-white rounded-2xl shadow-2xl border border-white/10 p-2 z-50 fade-in">
+            <div class="px-3 py-2 text-xs font-bold text-slate-200 border-b border-white/10">
+              My Account
+            </div>
+            <button type="button" id="btn-dropdown-change-password" class="w-full flex items-center justify-between px-3 py-2.5 mt-1 text-xs font-medium text-slate-200 hover:bg-white/10 rounded-xl transition-colors cursor-pointer text-left">
+              <div class="flex items-center space-x-2.5">
+                <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+                <span>Change Password</span>
+              </div>
+              <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+            <button type="button" id="btn-dropdown-logout" class="w-full flex items-center space-x-2.5 px-3 py-2.5 text-xs font-medium text-red-400 hover:bg-red-500/10 rounded-xl transition-colors cursor-pointer border-t border-white/10 mt-1 text-left">
+              <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Segmented Navigation (Mobile) -->
@@ -81,6 +173,17 @@
       </div>
     </div>
   </header>
+
+  <!-- Dynamic Role Notice Banner -->
+  <div id="role-notice-banner" class="border-b transition-all">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between text-xs">
+      <div class="flex items-center space-x-2" id="role-notice-text">
+        <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+        <span class="font-medium text-slate-700">Authenticated as <strong class="font-bold text-purple-700">Administrator</strong> — Full access to edit criteria, reorder priorities, manage partners & settings.</span>
+      </div>
+      
+    </div>
+  </div>
 
   <!-- Main Workspace -->
   <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -660,6 +763,7 @@
     </section>
 
   </main>
+  </div>
 
   <!-- ================================================================= -->
   <!-- APPLE MODAL: EDIT LENDER GUIDELINES -->
@@ -1120,6 +1224,112 @@
     </div>
   </div>
 
-  <script src="app.js"></script>
+    <!-- ================================================================= -->
+  <!-- MODAL: CHANGE PASSWORD -->
+  <!-- ================================================================= -->
+  <div id="modal-change-password" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-black/[0.08] overflow-hidden fade-in">
+      
+      <!-- Modal Header -->
+      <div class="p-6 bg-gradient-to-b from-slate-50 to-white border-b border-slate-100 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900 tracking-tight">Change Password</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Update credentials for your authenticated account</p>
+          </div>
+        </div>
+        <button id="btn-close-change-password-modal" type="button" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-full hover:bg-slate-100 transition-colors cursor-pointer">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Modal Body Form -->
+      <form id="form-change-password" class="p-6 space-y-4">
+        
+        <!-- Alerts -->
+        <div id="cp-error-alert" class="hidden p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center space-x-2">
+          <svg class="w-4 h-4 shrink-0 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span id="cp-error-message">Error updating password</span>
+        </div>
+
+        <div id="cp-success-alert" class="hidden p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium flex items-center space-x-2">
+          <svg class="w-4 h-4 shrink-0 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          <span id="cp-success-message">Password updated successfully!</span>
+        </div>
+
+        <!-- Current Password -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Current Password</label>
+          <div class="relative">
+            <input
+              type="password"
+              id="cp-input-current"
+              required
+              placeholder="Enter current password"
+              class="apple-input w-full px-3.5 py-2.5 pr-10 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+            />
+            <button type="button" id="btn-toggle-cp-current" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-1 cursor-pointer">
+              <svg class="w-4 h-4 icon-eye" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+              <svg class="w-4 h-4 icon-eye-off hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- New Password -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">New Password</label>
+          <div class="relative">
+            <input
+              type="password"
+              id="cp-input-new"
+              required
+              minlength="6"
+              placeholder="At least 6 characters"
+              class="apple-input w-full px-3.5 py-2.5 pr-10 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+            />
+            <button type="button" id="btn-toggle-cp-new" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-1 cursor-pointer">
+              <svg class="w-4 h-4 icon-eye" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+              <svg class="w-4 h-4 icon-eye-off hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>
+            </button>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1">Must be at least 6 characters long.</p>
+        </div>
+
+        <!-- Confirm New Password -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Confirm New Password</label>
+          <div class="relative">
+            <input
+              type="password"
+              id="cp-input-confirm"
+              required
+              placeholder="Confirm new password"
+              class="apple-input w-full px-3.5 py-2.5 pr-10 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+            />
+            <button type="button" id="btn-toggle-cp-confirm" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-1 cursor-pointer">
+              <svg class="w-4 h-4 icon-eye" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+              <svg class="w-4 h-4 icon-eye-off hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="pt-3 border-t border-slate-100 flex items-center justify-end space-x-2.5">
+          <button type="button" id="btn-cancel-change-password" class="apple-btn-secondary px-4 py-2 text-xs rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 font-bold transition-all cursor-pointer">
+            Cancel
+          </button>
+          <button type="submit" id="btn-submit-change-password" class="apple-btn-primary px-4 py-2 text-xs rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-md shadow-blue-500/25 transition-all cursor-pointer">
+            Update Password
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js?v=7.0.0"></script>
 </body>
 </html>
