@@ -65,17 +65,13 @@ function extractAuthUser(req) {
 
 function checkAdminAuth(req) {
   const user = extractAuthUser(req);
-  if (user && user.role === ROLES.ADMIN) return true;
-  if (user && user.role !== ROLES.ADMIN) return false;
-  if (!ADMIN_API_KEY) return true; // Open if not explicitly configured
-  const authHeader = req.headers['authorization'] || '';
-  const token = authHeader.replace(/^Bearer\s+/i, '').trim();
-  return token === ADMIN_API_KEY;
+  if (!user) return false;
+  return user.role === ROLES.ADMIN;
 }
 
 function checkCanOperate(req) {
   const user = extractAuthUser(req);
-  if (!user) return true;
+  if (!user) return false;
   return user.role === ROLES.ADMIN || user.role === ROLES.BASIC;
 }
 
@@ -124,52 +120,10 @@ const server = http.createServer(async (req, res) => {
     // API: AUTHENTICATION & ROLE-BASED ACCESS CONTROL (RBAC)
     // -------------------------------------------------------------
     if (req.method === 'POST' && pathname === '/api/v1/auth/signup') {
-      const body = await parseBody(req);
-      const email = (body.email || '').trim().toLowerCase();
-      const password = body.password || '';
-      if (!email || !password) {
-        return sendJSON(res, 400, { success: false, error: 'Email and password are required' });
-      }
-
-      let user = null;
-      try {
-        const stmt = db.db.prepare('SELECT * FROM users WHERE LOWER(email) = ? OR LOWER(username) = ?');
-        user = stmt.get(email, email.split('@')[0]);
-      } catch (e) {}
-
-      if (!user) {
-        try {
-          user = authService.createUser({
-            username: email.split('@')[0].replace(/[^a-z0-9_]/g, '_') || 'demo_user',
-            email: email,
-            password: password,
-            name: email.split('@')[0].replace(/[^a-zA-Z0-9]/g, ' ') || 'Demo User',
-            role: ROLES.BASIC
-          });
-        } catch (err) {
-          try {
-            const stmt = db.db.prepare('SELECT * FROM users WHERE LOWER(email) = ?');
-            user = stmt.get(email);
-          } catch (e2) {}
-        }
-      }
-
-      try {
-        const result = authService.login(user?.username || email, password, ROLES.BASIC);
-        return sendJSON(res, 200, {
-          success: true,
-          token: result.token,
-          user: result.user
-        });
-      } catch (err) {
-        // Safe fallback for demo mode using basic user permissions
-        const result = authService.login('basic', 'basic123', ROLES.BASIC);
-        return sendJSON(res, 200, {
-          success: true,
-          token: result.token,
-          user: { ...result.user, email: email, name: email.split('@')[0] || 'Demo User' }
-        });
-      }
+      return sendJSON(res, 403, {
+        success: false,
+        error: 'Self-registration is disabled. Please contact your NBFC administrator to obtain credentials.'
+      });
     }
 
     if (req.method === 'POST' && pathname === '/api/v1/auth/login') {

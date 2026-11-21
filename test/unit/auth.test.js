@@ -100,6 +100,49 @@ try {
   assert.strictEqual(newLogin.user.name, 'External Audit Officer');
   console.log('✓ Test 8: User lifecycle creation and authentication verified');
 
+  // Test 9: Password management (changePassword)
+  const basicUser = users.find(u => u.username === 'basic');
+  assert.ok(basicUser, 'Basic user must exist in seeded accounts');
+
+  // 9a: Reject empty or missing parameters
+  assert.throws(() => {
+    authService.changePassword(basicUser.id, '', 'newSecret123');
+  }, /User ID, current password, and new password are required/, 'Should reject missing parameters');
+
+  // 9b: Reject new password with length < 6 characters
+  assert.throws(() => {
+    authService.changePassword(basicUser.id, 'basic123', '12345');
+  }, /at least 6 characters long/, 'Should reject password under 6 characters');
+
+  // 9c: Reject incorrect current password
+  assert.throws(() => {
+    authService.changePassword(basicUser.id, 'wrongpassword', 'newSecret123');
+  }, /Current password is incorrect/, 'Should reject incorrect current password');
+
+  // 9d: Successfully update password
+  const changeRes = authService.changePassword(basicUser.id, 'basic123', 'newSecret123');
+  assert.strictEqual(changeRes.success, true);
+  assert.strictEqual(changeRes.message, 'Password updated successfully');
+
+  // 9e: Verification that subsequent authentication succeeds with the new password
+  const newCredsLogin = authService.login('basic', 'newSecret123');
+  assert.ok(newCredsLogin.token, 'Login with new password must succeed');
+  assert.strictEqual(newCredsLogin.user.id, basicUser.id);
+  const newCredsVerified = authService.verifyToken(newCredsLogin.token);
+  assert.strictEqual(newCredsVerified.userId, basicUser.id);
+
+  // 9f: Verification that authentication fails with the old password
+  assert.throws(() => {
+    authService.login('basic', 'basic123');
+  }, /password incorrect/, 'Login with old password must fail');
+
+  // 9g: Restore original password and verify recovery
+  const restoreRes = authService.changePassword(basicUser.id, 'newSecret123', 'basic123');
+  assert.strictEqual(restoreRes.success, true);
+  const restoredLogin = authService.login('basic', 'basic123');
+  assert.ok(restoredLogin.token, 'Login with restored original password must succeed');
+  console.log('✓ Test 9: Password change, password length policy, and credential update verified');
+
   console.log('\n🎉 ALL AUTHENTICATION & RBAC UNIT TESTS PASSED WITH 100% SUCCESS.');
 } finally {
   db.close();
